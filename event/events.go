@@ -44,10 +44,14 @@ func (s Source) String() string {
 }
 
 // GUIDGenerator must returns a new unique Global unique ID for events
-type GUIDGenerator func() string
+type GUIDGenerator func() (string, error)
 
-var guidGen GUIDGenerator = func() string {
-	return uuid.Must(uuid.NewV4()).String()
+var guidGen GUIDGenerator = func() (string, error) {
+	newid, err := uuid.NewV4()
+	if err != nil {
+		return "", err
+	}
+	return newid.String(), nil
 }
 
 // SetGUIDGen sets a guid generator
@@ -56,14 +60,15 @@ func SetGUIDGen(g GUIDGenerator) {
 }
 
 //New event
-func New(t Type, c Code, l Level) Event {
+func New(t Type, c Code, l Level) (Event, error) {
+	nid, err := guidGen()
 	return Event{
-		ID:    guidGen(),
+		ID:    nid,
 		Type:  t,
 		Code:  c,
 		Level: l,
 		Data:  make(map[string]interface{}),
-	}
+	}, err
 }
 
 // Type defines the type of event
