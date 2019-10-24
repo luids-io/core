@@ -17,7 +17,7 @@ import (
 	"strconv"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 )
 
 // Event stores event info.
