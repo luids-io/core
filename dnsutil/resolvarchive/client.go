@@ -1,13 +1,13 @@
 // Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. See LICENSE.
 
-package resolvcollect
+package resolvarchive
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"net"
 
+	"github.com/golang/protobuf/ptypes"
 	"github.com/luisguillenc/yalogi"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -18,14 +18,14 @@ import (
 	pb "github.com/luids-io/core/protogen/dnsutilpb"
 )
 
-// Client implements a grpc client that implements dnsutil.ResolvCollector
+// Client implements a grpc client that implements dnsutil.ResolvArchiver
 // interface.
 type Client struct {
 	opts   clientOpts
 	logger yalogi.Logger
 	//grpc connection
 	conn   *grpc.ClientConn
-	client pb.ResolvCollectClient
+	client pb.ResolvArchiveClient
 	//control
 	started bool
 }
@@ -69,35 +69,37 @@ func NewClient(conn *grpc.ClientConn, opt ...ClientOption) *Client {
 		opts:    opts,
 		logger:  opts.logger,
 		conn:    conn,
-		client:  pb.NewResolvCollectClient(conn),
+		client:  pb.NewResolvArchiveClient(conn),
 		started: true,
 	}
 }
 
-// Collect implements dnsutil.ResolvCollector interface
-func (c *Client) Collect(ctx context.Context, client net.IP, name string, resolved []net.IP) error {
+// Save implements dnsutil.ResolvArchiver interface
+func (c *Client) Save(ctx context.Context, data dnsutil.ResolvData) (string, error) {
 	if !c.started {
-		return errors.New("client closed")
+		return "", errors.New("client closed")
 	}
-	return c.doCollect(ctx, client, name, resolved)
+	return c.doSave(ctx, data)
 }
 
-// Collect implements dnsutil.ResolvCollector interface
-func (c *Client) doCollect(ctx context.Context, client net.IP, name string, resolved []net.IP) error {
-	rr := make([]string, 0, len(resolved))
-	for _, r := range resolved {
+func (c *Client) doSave(ctx context.Context, data dnsutil.ResolvData) (string, error) {
+	tstamp, _ := ptypes.TimestampProto(data.Timestamp)
+	rr := make([]string, 0, len(data.Resolved))
+	for _, r := range data.Resolved {
 		rr = append(rr, r.String())
 	}
-	req := &pb.ResolvCollectRequest{
-		ClientIp:    client.String(),
-		Name:        name,
+	req := &pb.SaveResolvRequest{
+		Ts:          tstamp,
+		ServerIp:    data.Server.String(),
+		ClientIp:    data.Client.String(),
+		Name:        data.Name,
 		ResolvedIps: rr,
 	}
-	_, err := c.client.Collect(ctx, req)
+	resp, err := c.client.SaveResolv(ctx, req)
 	if err != nil {
-		return c.mapError(err)
+		return "", c.mapError(err)
 	}
-	return nil
+	return resp.GetId(), nil
 }
 
 //mapping errors
@@ -110,13 +112,6 @@ func (c *Client) mapError(err error) error {
 	switch st.Code() {
 	case codes.InvalidArgument:
 		retErr = dnsutil.ErrBadRequestFormat
-	case codes.ResourceExhausted:
-		if st.Message() == dnsutil.ErrCollectDNSClientLimit.Error() {
-			retErr = dnsutil.ErrCollectDNSClientLimit
-		}
-		if st.Message() == dnsutil.ErrCollectNamesLimit.Error() {
-			retErr = dnsutil.ErrCollectNamesLimit
-		}
 	case codes.Unavailable:
 		if st.Message() == dnsutil.ErrServiceNotAvailable.Error() {
 			retErr = dnsutil.ErrServiceNotAvailable

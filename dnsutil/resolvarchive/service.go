@@ -1,12 +1,12 @@
 // Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. See LICENSE.
 
-package resolvcollect
+package resolvarchive
 
 import (
 	"context"
 	"net"
 
-	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,8 +17,8 @@ import (
 
 // Service implements a service wrapper for the grpc api
 type Service struct {
-	opts      serviceOpts
-	collector dnsutil.ResolvCollector
+	opts     serviceOpts
+	archiver dnsutil.ResolvArchiver
 }
 
 type serviceOpts struct {
@@ -38,56 +38,62 @@ func DisclosureErrors(b bool) ServiceOption {
 }
 
 // NewService returns a new Service for the grpc api
-func NewService(c dnsutil.ResolvCollector, opt ...ServiceOption) *Service {
+func NewService(a dnsutil.ResolvArchiver, opt ...ServiceOption) *Service {
 	opts := defaultServiceOpts
 	for _, o := range opt {
 		o(&opts)
 	}
-	return &Service{collector: c, opts: opts}
+	return &Service{archiver: a, opts: opts}
 }
 
 // RegisterServer registers a service in the grpc server
 func RegisterServer(server *grpc.Server, service *Service) {
-	pb.RegisterResolvCollectServer(server, service)
+	pb.RegisterResolvArchiveServer(server, service)
 }
 
-// Collect implements interface
-func (s *Service) Collect(ctx context.Context, req *pb.ResolvCollectRequest) (*empty.Empty, error) {
+// SaveResolv implements interface
+func (s *Service) SaveResolv(ctx context.Context, req *pb.SaveResolvRequest) (*pb.SaveResolvResponse, error) {
 	//parse request
-	client, name, resolved, err := parseRequest(req)
+	data, err := parseRequest(req)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	//do request
-	err = s.collector.Collect(ctx, client, name, resolved)
+	newid, err := s.archiver.Save(ctx, data)
 	if err != nil {
 		return nil, s.mapError(err)
 	}
 	//return response
-	return &empty.Empty{}, nil
+	return &pb.SaveResolvResponse{Id: newid}, nil
 }
 
-func parseRequest(req *pb.ResolvCollectRequest) (net.IP, string, []net.IP, error) {
-	client := net.ParseIP(req.GetClientIp())
-	if client == nil {
-		return nil, "", nil, dnsutil.ErrBadRequestFormat
+func parseRequest(req *pb.SaveResolvRequest) (dnsutil.ResolvData, error) {
+	i := dnsutil.ResolvData{}
+	i.Timestamp, _ = ptypes.Timestamp(req.GetTs())
+	i.Server = net.ParseIP(req.GetServerIp())
+	if i.Server == nil {
+		return i, dnsutil.ErrBadRequestFormat
 	}
-	name := req.GetName()
-	if name == "" {
-		return nil, "", nil, dnsutil.ErrBadRequestFormat
+	i.Client = net.ParseIP(req.GetClientIp())
+	if i.Client == nil {
+		return i, dnsutil.ErrBadRequestFormat
 	}
 	if len(req.GetResolvedIps()) == 0 {
-		return nil, "", nil, dnsutil.ErrBadRequestFormat
+		return i, dnsutil.ErrBadRequestFormat
 	}
-	resolved := make([]net.IP, 0, len(req.GetResolvedIps()))
+	i.Resolved = make([]net.IP, 0, len(req.GetResolvedIps()))
 	for _, r := range req.GetResolvedIps() {
 		ip := net.ParseIP(r)
 		if ip == nil {
-			return nil, "", nil, dnsutil.ErrBadRequestFormat
+			return i, dnsutil.ErrBadRequestFormat
 		}
-		resolved = append(resolved, ip)
+		i.Resolved = append(i.Resolved, ip)
 	}
-	return client, name, resolved, nil
+	i.Name = req.GetName()
+	if i.Name == "" {
+		return i, dnsutil.ErrBadRequestFormat
+	}
+	return i, nil
 }
 
 //mapping errors
@@ -95,10 +101,6 @@ func (s *Service) mapError(err error) error {
 	switch err {
 	case dnsutil.ErrBadRequestFormat:
 		return status.Error(codes.InvalidArgument, err.Error())
-	case dnsutil.ErrCollectDNSClientLimit:
-		return status.Error(codes.ResourceExhausted, err.Error())
-	case dnsutil.ErrCollectNamesLimit:
-		return status.Error(codes.ResourceExhausted, err.Error())
 	case dnsutil.ErrServiceNotAvailable:
 		return status.Error(codes.Unavailable, err.Error())
 	default:

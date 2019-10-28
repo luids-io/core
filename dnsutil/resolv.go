@@ -12,7 +12,7 @@ import (
 // Some standard errors returned by resolv interfaces
 var (
 	ErrBadRequestFormat      = errors.New("bad format in request")
-	ErrCacheNotAvailable     = errors.New("cache is not available")
+	ErrServiceNotAvailable   = errors.New("service not available")
 	ErrCollectDNSClientLimit = errors.New("max queries per dns client")
 	ErrCollectNamesLimit     = errors.New("max names resolved for an ip")
 )
@@ -41,4 +41,19 @@ type ResolvResponse struct {
 	Last time.Time `json:"last,omitempty"`
 	// Store time
 	Store time.Time `json:"store"`
+}
+
+// ResolvArchiver is the interface for archive resolvs
+type ResolvArchiver interface {
+	Save(context.Context, ResolvData) (string, error)
+}
+
+// ResolvData defines struct for archive
+type ResolvData struct {
+	ID        string    `json:"id" bson:"_id"`
+	Timestamp time.Time `json:"timestamp"`
+	Server    net.IP    `json:"server"`
+	Client    net.IP    `json:"client"`
+	Resolved  []net.IP  `json:"resolved"`
+	Name      string    `json:"name"`
 }
