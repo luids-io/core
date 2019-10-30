@@ -4,16 +4,15 @@ package notify
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/luisguillenc/yalogi"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 
 	"github.com/luids-io/core/event"
+	"github.com/luids-io/core/event/encoding"
 	pb "github.com/luids-io/core/protogen/eventpb"
 )
 
@@ -133,33 +132,12 @@ func (c *Client) Ping() error {
 }
 
 func eventToRequest(e event.Event) (*pb.NotifyRequest, error) {
-	req := &pb.NotifyRequest{}
-	req.Id = e.ID
-	req.Type = pb.NotifyRequest_Type(e.Type)
-	req.Code = int32(e.Code)
-	req.Level = pb.NotifyRequest_Level(e.Level)
-	req.Timestamp, _ = ptypes.TimestampProto(e.Timestamp)
-	req.Source = &pb.NotifyRequest_Source{
-		Hostname: e.Source.Hostname,
-		Program:  e.Source.Program,
-		Instance: e.Source.Instance,
-	}
-	//if no data
-	if e.Data == nil || len(e.Data) == 0 {
-		req.Data = &pb.NotifyRequest_Data{
-			DataEnc: pb.NotifyRequest_Data_NODATA,
-		}
-		return req, nil
-	}
-	// encode data to json
-	encoded, err := json.Marshal(e.Data)
+	pbevent, err := encoding.EventPB(e)
 	if err != nil {
-		return nil, fmt.Errorf("cannot encode data to json: %v", err)
+		return nil, err
 	}
-	req.Data = &pb.NotifyRequest_Data{
-		DataEnc: pb.NotifyRequest_Data_JSON,
-		Data:    encoded,
-	}
+	req := &pb.NotifyRequest{}
+	req.Event = pbevent
 	return req, nil
 }
 

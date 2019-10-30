@@ -4,16 +4,15 @@ package notify
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
+	"errors"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/luids-io/core/event"
+	"github.com/luids-io/core/event/encoding"
 	pb "github.com/luids-io/core/protogen/eventpb"
 )
 
@@ -50,27 +49,11 @@ func (s *Service) Notify(ctx context.Context, in *pb.NotifyRequest) (*pb.NotifyR
 }
 
 func eventFromRequest(req *pb.NotifyRequest) (event.Event, error) {
-	e := event.Event{}
-	e.ID = req.GetId()
-	e.Type = event.Type(req.GetType())
-	e.Code = event.Code(req.GetCode())
-	e.Level = event.Level(req.GetLevel())
-	e.Timestamp, _ = ptypes.Timestamp(req.GetTimestamp())
-	e.Source.Hostname = req.GetSource().GetHostname()
-	e.Source.Instance = req.GetSource().GetInstance()
-	e.Source.Program = req.GetSource().GetProgram()
-	//decode event data
-	switch req.GetData().GetDataEnc() {
-	case pb.NotifyRequest_Data_JSON:
-		rawData := req.Data.GetData()
-		err := json.Unmarshal(rawData, &e.Data)
-		if err != nil {
-			return event.Event{}, fmt.Errorf("unmarshalling data: %v", err)
-		}
-	case pb.NotifyRequest_Data_NODATA:
-		e.Data = make(map[string]interface{})
+	pbevent := req.GetEvent()
+	if pbevent == nil {
+		return event.Event{}, errors.New("event is empty")
 	}
-	return e, nil
+	return encoding.Event(pbevent)
 }
 
 //mapping errors

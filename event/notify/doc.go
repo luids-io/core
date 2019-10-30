@@ -6,7 +6,7 @@ import "fmt"
 
 // Constants for api description
 const (
-	APIName    = "luids.notify"
+	APIName    = "luids.event"
 	APIVersion = "v1"
 	APIService = "Notify"
 )
