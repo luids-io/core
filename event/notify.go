@@ -13,11 +13,16 @@ type Notifier interface {
 	Notify(ctx context.Context, e Event) (string, error)
 }
 
+// Buffer interface must be used for event buffering implementations
+type Buffer interface {
+	Notify(e Event) error
+}
+
 //default buffer instance
-var instance *Buffer
+var instance Buffer
 
 // SetBuffer sets the default buffer instance
-func SetBuffer(b *Buffer) {
+func SetBuffer(b Buffer) {
 	instance = b
 }
 

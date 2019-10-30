@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/luids-io/core/event"
 	"github.com/luisguillenc/yalogi"
 )
 
@@ -14,9 +15,9 @@ type Buffer struct {
 	//logger used for errors
 	logger yalogi.Logger
 	//collector
-	notifier Notifier
+	notifier event.Notifier
 	//data channel
-	eventCh chan Event
+	eventCh chan event.Event
 	//control
 	closed bool
 	close  chan struct{}
@@ -42,8 +43,8 @@ func SetLogger(l yalogi.Logger) BufferOption {
 	}
 }
 
-// NewBuffer returns a new event buffer
-func NewBuffer(n Notifier, size int, opt ...BufferOption) *Buffer {
+// New returns a new event buffer
+func New(n event.Notifier, size int, opt ...BufferOption) *Buffer {
 	opts := defaultBufferOpts
 	for _, o := range opt {
 		o(&opts)
@@ -51,7 +52,7 @@ func NewBuffer(n Notifier, size int, opt ...BufferOption) *Buffer {
 	b := &Buffer{
 		logger:   opts.logger,
 		notifier: n,
-		eventCh:  make(chan Event, size),
+		eventCh:  make(chan event.Event, size),
 		close:    make(chan struct{}),
 	}
 	go b.doProcess()
@@ -59,7 +60,7 @@ func NewBuffer(n Notifier, size int, opt ...BufferOption) *Buffer {
 }
 
 // Notify implements an asyncronous notification
-func (b *Buffer) Notify(e Event) error {
+func (b *Buffer) Notify(e event.Event) error {
 	if b.closed {
 		return errors.New("buffer is closed")
 	}
