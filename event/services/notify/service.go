@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/luids-io/core/event"
-	"github.com/luids-io/core/event/encoding"
+	"github.com/luids-io/core/event/services/encoding"
 	pb "github.com/luids-io/core/protogen/eventpb"
 )
 
