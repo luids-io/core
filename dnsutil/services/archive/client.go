@@ -1,6 +1,6 @@
 // Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. See LICENSE.
 
-package resolvarchive
+package archive
 
 import (
 	"context"
@@ -25,7 +25,7 @@ type Client struct {
 	logger yalogi.Logger
 	//grpc connection
 	conn   *grpc.ClientConn
-	client pb.ResolvArchiveClient
+	client pb.ArchiveClient
 	//control
 	started bool
 }
@@ -69,13 +69,13 @@ func NewClient(conn *grpc.ClientConn, opt ...ClientOption) *Client {
 		opts:    opts,
 		logger:  opts.logger,
 		conn:    conn,
-		client:  pb.NewResolvArchiveClient(conn),
+		client:  pb.NewArchiveClient(conn),
 		started: true,
 	}
 }
 
-// Save implements dnsutil.ResolvArchiver interface
-func (c *Client) Save(ctx context.Context, data dnsutil.ResolvData) (string, error) {
+// SaveResolv implements dnsutil.Archiver interface
+func (c *Client) SaveResolv(ctx context.Context, data dnsutil.ResolvData) (string, error) {
 	if !c.started {
 		return "", errors.New("client closed")
 	}

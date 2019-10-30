@@ -1,6 +1,6 @@
 // Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. See LICENSE.
 
-package resolvarchive
+package archive
 
 import (
 	"context"
@@ -18,7 +18,7 @@ import (
 // Service implements a service wrapper for the grpc api
 type Service struct {
 	opts     serviceOpts
-	archiver dnsutil.ResolvArchiver
+	archiver dnsutil.Archiver
 }
 
 type serviceOpts struct {
@@ -38,7 +38,7 @@ func DisclosureErrors(b bool) ServiceOption {
 }
 
 // NewService returns a new Service for the grpc api
-func NewService(a dnsutil.ResolvArchiver, opt ...ServiceOption) *Service {
+func NewService(a dnsutil.Archiver, opt ...ServiceOption) *Service {
 	opts := defaultServiceOpts
 	for _, o := range opt {
 		o(&opts)
@@ -48,7 +48,7 @@ func NewService(a dnsutil.ResolvArchiver, opt ...ServiceOption) *Service {
 
 // RegisterServer registers a service in the grpc server
 func RegisterServer(server *grpc.Server, service *Service) {
-	pb.RegisterResolvArchiveServer(server, service)
+	pb.RegisterArchiveServer(server, service)
 }
 
 // SaveResolv implements interface
@@ -59,7 +59,7 @@ func (s *Service) SaveResolv(ctx context.Context, req *pb.SaveResolvRequest) (*p
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	//do request
-	newid, err := s.archiver.Save(ctx, data)
+	newid, err := s.archiver.SaveResolv(ctx, data)
 	if err != nil {
 		return nil, s.mapError(err)
 	}

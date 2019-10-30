@@ -42,18 +42,3 @@ type ResolvResponse struct {
 	// Store time
 	Store time.Time `json:"store"`
 }
-
-// ResolvArchiver is the interface for archive resolvs
-type ResolvArchiver interface {
-	Save(context.Context, ResolvData) (string, error)
-}
-
-// ResolvData defines struct for archive
-type ResolvData struct {
-	ID        string    `json:"id" bson:"_id"`
-	Timestamp time.Time `json:"timestamp"`
-	Server    net.IP    `json:"server"`
-	Client    net.IP    `json:"client"`
-	Resolved  []net.IP  `json:"resolved"`
-	Name      string    `json:"name"`
-}

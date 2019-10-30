@@ -1,10 +1,10 @@
 // Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. See LICENSE.
 
-// Package resolvarchive implements a resolv archiver client and a ready
+// Package archive implements a dns info archiver client and a ready
 // to use service component.
 //
 // This package is a work in progress and makes no API stability promises.
-package resolvarchive
+package archive
 
 import "fmt"
 
@@ -12,7 +12,7 @@ import "fmt"
 const (
 	APIName    = "luids.dnsutil"
 	APIVersion = "v1"
-	APIService = "ResolvArchive"
+	APIService = "Archive"
 )
 
 // ServiceName returns service name

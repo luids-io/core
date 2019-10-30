@@ -1,6 +1,6 @@
 // Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. See LICENSE.
 
-package resolvarchive
+package archive
 
 import (
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
