@@ -62,11 +62,13 @@ func SetGUIDGen(g GUIDGenerator) {
 //New event
 func New(t Type, c Code, l Level) Event {
 	return Event{
-		ID:    guidGen(),
-		Type:  t,
-		Code:  c,
-		Level: l,
-		Data:  make(map[string]interface{}),
+		ID:        guidGen(),
+		Type:      t,
+		Code:      c,
+		Level:     l,
+		Timestamp: time.Now(),
+		Source:    defaultSource,
+		Data:      make(map[string]interface{}),
 	}
 }
 
