@@ -38,7 +38,7 @@ func (r *Registry) Register(id string, svc Service) error {
 	return nil
 }
 
-// GetService using its id, returns service interface, api signature and true if service exists
+// GetService implements Discover interface
 func (r *Registry) GetService(id string) (Service, bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -49,8 +49,8 @@ func (r *Registry) GetService(id string) (Service, bool) {
 	return i.service, true
 }
 
-// List returns an ordered list of registered ids
-func (r *Registry) List() []string {
+// ListServices implements Discover interface
+func (r *Registry) ListServices() []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	list := make([]string, 0, len(r.services))
@@ -64,7 +64,7 @@ func (r *Registry) List() []string {
 // Ping all registered services
 func (r *Registry) Ping() error {
 	errs := make([]string, 0, len(r.services))
-	for _, id := range r.List() {
+	for _, id := range r.ListServices() {
 		svc, ok := r.services[id]
 		if ok {
 			err := svc.service.Ping()
@@ -80,7 +80,7 @@ func (r *Registry) Ping() error {
 // CloseAll registered services
 func (r *Registry) CloseAll() error {
 	errs := make([]string, 0, len(r.services))
-	for _, id := range r.List() {
+	for _, id := range r.ListServices() {
 		svc, ok := r.services[id]
 		if ok {
 			err := svc.service.Close()

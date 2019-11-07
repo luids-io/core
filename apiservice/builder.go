@@ -13,13 +13,6 @@ import (
 	"github.com/luisguillenc/yalogi"
 )
 
-// Service the interface implemented by microservice stubs
-type Service interface {
-	API() string
-	Close() error
-	Ping() error
-}
-
 // Definition is used for define and construct microservices
 type Definition struct {
 	// ID must exist and be unique for its correct operation
