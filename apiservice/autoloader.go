@@ -49,7 +49,9 @@ func NewAutoloader(defs []Definition, opt ...Option) *Autoloader {
 		reg:    NewRegistry(),
 	}
 	for _, def := range defs {
-		a.defs[def.ID] = def
+		if !def.Disabled {
+			a.defs[def.ID] = def
+		}
 	}
 	return a
 }
