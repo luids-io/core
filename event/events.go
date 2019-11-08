@@ -16,20 +16,18 @@ import (
 	"sort"
 	"strconv"
 	"time"
-
-	"github.com/gofrs/uuid"
 )
 
 // Event stores event info.
 type Event struct {
-	ID        string                 `json:"id"`
-	Type      Type                   `json:"type"`
-	Code      Code                   `json:"code"`
-	Level     Level                  `json:"level"`
-	Timestamp time.Time              `json:"timestamp"`
-	Received  time.Time              `json:"received"`
-	Source    Source                 `json:"source"`
-	Data      map[string]interface{} `json:"data,omitempty"`
+	ID       string                 `json:"id" bson:"_id"`
+	Type     Type                   `json:"type"`
+	Code     Code                   `json:"code"`
+	Level    Level                  `json:"level"`
+	Created  time.Time              `json:"created"`
+	Received time.Time              `json:"received"`
+	Source   Source                 `json:"source"`
+	Data     map[string]interface{} `json:"data,omitempty"`
 }
 
 // Source stores event source information.
@@ -43,32 +41,15 @@ func (s Source) String() string {
 	return fmt.Sprintf("%s.%s[%s]", s.Hostname, s.Program, s.Instance)
 }
 
-// GUIDGenerator must returns a new unique Global unique ID for events
-type GUIDGenerator func() string
-
-var guidGen GUIDGenerator = func() string {
-	newid, err := uuid.NewV4()
-	if err != nil {
-		return ""
-	}
-	return newid.String()
-}
-
-// SetGUIDGen sets a guid generator
-func SetGUIDGen(g GUIDGenerator) {
-	guidGen = g
-}
-
 //New event
 func New(t Type, c Code, l Level) Event {
 	return Event{
-		ID:        guidGen(),
-		Type:      t,
-		Code:      c,
-		Level:     l,
-		Timestamp: time.Now(),
-		Source:    defaultSource,
-		Data:      make(map[string]interface{}),
+		Type:    t,
+		Code:    c,
+		Level:   l,
+		Created: time.Now(),
+		Source:  defaultSource,
+		Data:    make(map[string]interface{}),
 	}
 }
 

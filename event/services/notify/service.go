@@ -5,7 +5,6 @@ package notify
 import (
 	"context"
 	"errors"
-	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -38,7 +37,6 @@ func (s *Service) Notify(ctx context.Context, in *pb.NotifyRequest) (*pb.NotifyR
 		rpcerr := status.Error(codes.InvalidArgument, "request is not valid")
 		return nil, rpcerr
 	}
-	e.Received = time.Now()
 	reqID, err := s.notifier.Notify(ctx, e)
 	if err != nil {
 		rpcerr := status.Error(codes.Internal, err.Error())

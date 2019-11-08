@@ -18,7 +18,8 @@ func Event(pbevent *pb.Event) (event.Event, error) {
 	e.Type = event.Type(pbevent.GetType())
 	e.Code = event.Code(pbevent.GetCode())
 	e.Level = event.Level(pbevent.GetLevel())
-	e.Timestamp, _ = ptypes.Timestamp(pbevent.GetTimestamp())
+	e.Created, _ = ptypes.Timestamp(pbevent.GetCreatedTs())
+	e.Received, _ = ptypes.Timestamp(pbevent.GetReceivedTs())
 
 	pbsource := pbevent.GetSource()
 	if pbsource == nil {
@@ -52,7 +53,8 @@ func EventPB(e event.Event) (*pb.Event, error) {
 	pbevent.Type = pb.Event_Type(e.Type)
 	pbevent.Code = int32(e.Code)
 	pbevent.Level = pb.Event_Level(e.Level)
-	pbevent.Timestamp, _ = ptypes.TimestampProto(e.Timestamp)
+	pbevent.CreatedTs, _ = ptypes.TimestampProto(e.Created)
+	pbevent.ReceivedTS, _ = ptypes.TimestampProto(e.Received)
 	pbevent.Source = &pb.Event_Source{
 		Hostname: e.Source.Hostname,
 		Program:  e.Source.Program,
