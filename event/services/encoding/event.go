@@ -54,7 +54,7 @@ func EventPB(e event.Event) (*pb.Event, error) {
 	pbevent.Code = int32(e.Code)
 	pbevent.Level = pb.Event_Level(e.Level)
 	pbevent.CreatedTs, _ = ptypes.TimestampProto(e.Created)
-	pbevent.ReceivedTS, _ = ptypes.TimestampProto(e.Received)
+	pbevent.ReceivedTs, _ = ptypes.TimestampProto(e.Received)
 	pbevent.Source = &pb.Event_Source{
 		Hostname: e.Source.Hostname,
 		Program:  e.Source.Program,
