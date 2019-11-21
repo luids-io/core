@@ -13,8 +13,8 @@ import (
 	"github.com/luisguillenc/yalogi"
 )
 
-// Definition is used for define and construct microservices
-type Definition struct {
+// ServiceDef is used for define and construct microservices
+type ServiceDef struct {
 	// ID must exist and be unique for its correct operation
 	ID string `json:"id"`
 	// API defines the api implemented by the service
@@ -33,10 +33,10 @@ type Definition struct {
 
 // BuildFn defines a function that constructs a service using a
 // definition
-type BuildFn func(def Definition, logger yalogi.Logger) (Service, error)
+type BuildFn func(def ServiceDef, logger yalogi.Logger) (Service, error)
 
 // Validate checks definition field values
-func (def Definition) Validate() error {
+func (def ServiceDef) Validate() error {
 	if def.ID == "" {
 		return errors.New("'id' is required")
 	}
@@ -59,7 +59,7 @@ func (def Definition) Validate() error {
 }
 
 // ClientCfg returns client configuration
-func (def Definition) ClientCfg() grpctls.ClientCfg {
+func (def ServiceDef) ClientCfg() grpctls.ClientCfg {
 	if def.Client == nil {
 		return grpctls.ClientCfg{}
 	}
@@ -72,7 +72,7 @@ func RegisterBuilder(api string, builder BuildFn) {
 }
 
 // Build creates a new service using a service definition struct
-func Build(def Definition, logger yalogi.Logger) (Service, error) {
+func Build(def ServiceDef, logger yalogi.Logger) (Service, error) {
 	if def.Disabled {
 		return nil, errors.New("service is disabled")
 	}
@@ -88,8 +88,8 @@ func Build(def Definition, logger yalogi.Logger) (Service, error) {
 }
 
 // DefsFromFile creates a slice of Definition from a file in json format.
-func DefsFromFile(path string) ([]Definition, error) {
-	var services []Definition
+func DefsFromFile(path string) ([]ServiceDef, error) {
+	var services []ServiceDef
 	f, err := os.Open(path)
 	defer f.Close()
 	if err != nil {

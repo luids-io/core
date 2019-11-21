@@ -17,7 +17,7 @@ import (
 
 // ClientBuilder returns builder function
 func ClientBuilder(opt ...ClientOption) apiservice.BuildFn {
-	return func(def apiservice.Definition, logger yalogi.Logger) (apiservice.Service, error) {
+	return func(def apiservice.ServiceDef, logger yalogi.Logger) (apiservice.Service, error) {
 		//validates definition
 		err := def.Validate()
 		if err != nil {

@@ -12,7 +12,7 @@ import (
 // Autoloader implements a lazy build of services
 type Autoloader struct {
 	logger yalogi.Logger
-	defs   map[string]Definition
+	defs   map[string]ServiceDef
 	reg    *Registry
 	mu     sync.RWMutex
 }
@@ -38,14 +38,14 @@ func SetLogger(l yalogi.Logger) Option {
 }
 
 // NewAutoloader creates a new Autoloader with definitions
-func NewAutoloader(defs []Definition, opt ...Option) *Autoloader {
+func NewAutoloader(defs []ServiceDef, opt ...Option) *Autoloader {
 	opts := defaultOptions
 	for _, o := range opt {
 		o(&opts)
 	}
 	a := &Autoloader{
 		logger: opts.logger,
-		defs:   make(map[string]Definition),
+		defs:   make(map[string]ServiceDef),
 		reg:    NewRegistry(),
 	}
 	for _, def := range defs {
