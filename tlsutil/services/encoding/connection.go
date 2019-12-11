@@ -365,11 +365,11 @@ func ClientHelloDataPB(src *tlsutil.ClientHelloData) *pb.ConnectionData_ClientHe
 	dst.ExtensionLen = int32(src.ExtensionLen)
 	if len(src.Extensions) > 0 {
 		dst.Extensions = make([]*pb.ConnectionData_ExtensionItem, 0, len(src.Extensions))
-		for _, e := range dst.Extensions {
+		for _, e := range src.Extensions {
 			dst.Extensions = append(dst.Extensions,
 				&pb.ConnectionData_ExtensionItem{
-					Len:   e.GetLen(),
-					Etype: e.GetEtype(),
+					Len:   uint32(e.Len),
+					Etype: uint32(e.Type),
 				})
 		}
 	}
@@ -424,11 +424,11 @@ func ServerHelloDataPB(src *tlsutil.ServerHelloData) *pb.ConnectionData_ServerHe
 	dst.ExtensionLen = int32(src.ExtensionLen)
 	if len(src.Extensions) > 0 {
 		dst.Extensions = make([]*pb.ConnectionData_ExtensionItem, 0, len(src.Extensions))
-		for _, e := range dst.Extensions {
+		for _, e := range src.Extensions {
 			dst.Extensions = append(dst.Extensions,
 				&pb.ConnectionData_ExtensionItem{
-					Len:   e.GetLen(),
-					Etype: e.GetEtype(),
+					Len:   uint32(e.Len),
+					Etype: uint32(e.Type),
 				})
 		}
 	}
