@@ -20,16 +20,19 @@ const (
 	IPv4 Resource = iota
 	IPv6
 	Domain
+	MD5
+	SHA1
+	SHA256
 )
 
 // Resources is an ordered vector that constains all valid resource values.
 // Warning: It's a variable for simplicity, Do not modify the value!
-var Resources = []Resource{IPv4, IPv6, Domain}
+var Resources = []Resource{IPv4, IPv6, Domain, MD5, SHA1, SHA256}
 
 // IsValid returns true if the resource value is a valid
 func (r Resource) IsValid() bool {
 	v := int(r)
-	if v >= int(IPv4) && v <= int(Domain) {
+	if v >= int(IPv4) && v <= int(SHA256) {
 		return true
 	}
 	return false
@@ -68,6 +71,12 @@ func (r Resource) string() string {
 		return "ip6"
 	case Domain:
 		return "domain"
+	case MD5:
+		return "md5"
+	case SHA1:
+		return "sha1"
+	case SHA256:
+		return "sha256"
 	default:
 		return ""
 	}
@@ -91,6 +100,12 @@ func ToResource(s string) (Resource, error) {
 		return IPv6, nil
 	case "domain":
 		return Domain, nil
+	case "md5":
+		return MD5, nil
+	case "sha1":
+		return SHA1, nil
+	case "sha256":
+		return SHA256, nil
 	default:
 		return Resource(-1), fmt.Errorf("invalid resource %s", s)
 	}
@@ -121,6 +136,15 @@ func (r *Resource) UnmarshalJSON(data []byte) error {
 	case "domain":
 		*r = Domain
 		return nil
+	case "md5":
+		*r = MD5
+		return nil
+	case "sha1":
+		*r = SHA1
+		return nil
+	case "sha256":
+		*r = SHA256
+		return nil
 	default:
 		return fmt.Errorf("cannot unmarshal resource %s", s)
 	}
@@ -135,6 +159,12 @@ func ValidResource(name string, resource Resource) bool {
 		return isIPv6(name)
 	case Domain:
 		return isDomain(name)
+	case MD5:
+		return isMD5(name)
+	case SHA1:
+		return isSHA1(name)
+	case SHA256:
+		return isSHA256(name)
 	default:
 		return false
 	}
@@ -150,6 +180,12 @@ func Canonicalize(name string, resource Resource) (string, bool) {
 		return canonIPv6(name)
 	case Domain:
 		return canonDomain(name)
+	case MD5:
+		return canonMD5(name)
+	case SHA1:
+		return canonSHA1(name)
+	case SHA256:
+		return canonSHA256(name)
 	default:
 		return name, false
 	}
@@ -295,6 +331,51 @@ func isDomain(s string) bool {
 
 func canonDomain(s string) (string, bool) {
 	ok := validDomainRegexp.MatchString(s)
+	if !ok {
+		return s, false
+	}
+	return strings.ToLower(s), true
+}
+
+// note: we precompute for performance reasons
+var validMD5Regexp, _ = regexp.Compile(`^[a-fA-F0-9]{32}$`)
+
+func isMD5(s string) bool {
+	return validMD5Regexp.MatchString(s)
+}
+
+func canonMD5(s string) (string, bool) {
+	ok := validMD5Regexp.MatchString(s)
+	if !ok {
+		return s, false
+	}
+	return strings.ToLower(s), true
+}
+
+// note: we precompute for performance reasons
+var validSHA1Regexp, _ = regexp.Compile(`^[a-fA-F0-9]{40}$`)
+
+func isSHA1(s string) bool {
+	return validSHA1Regexp.MatchString(s)
+}
+
+func canonSHA1(s string) (string, bool) {
+	ok := validSHA1Regexp.MatchString(s)
+	if !ok {
+		return s, false
+	}
+	return strings.ToLower(s), true
+}
+
+// note: we precompute for performance reasons
+var validSHA256Regexp, _ = regexp.Compile(`^[a-fA-F0-9]{64}$`)
+
+func isSHA256(s string) bool {
+	return validSHA256Regexp.MatchString(s)
+}
+
+func canonSHA256(s string) (string, bool) {
+	ok := validSHA256Regexp.MatchString(s)
 	if !ok {
 		return s, false
 	}

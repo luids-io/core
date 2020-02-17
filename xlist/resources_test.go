@@ -17,9 +17,12 @@ func TestResourceIsValid(t *testing.T) {
 		{int(xlist.IPv4), true},
 		{int(xlist.IPv6), true},
 		{int(xlist.Domain), true},
+		{int(xlist.MD5), true},
+		{int(xlist.SHA1), true},
+		{int(xlist.SHA256), true},
 		//invalid values as the time of the writting if the test:
 		{-1, false},
-		{3, false},
+		{6, false},
 		{10, false},
 	}
 	for _, test := range tests {
@@ -38,6 +41,9 @@ func TestResourceString(t *testing.T) {
 		{xlist.IPv4, "ip4"},
 		{xlist.IPv6, "ip6"},
 		{xlist.Domain, "domain"},
+		{xlist.MD5, "md5"},
+		{xlist.SHA1, "sha1"},
+		{xlist.SHA256, "sha256"},
 		{xlist.Resource(-1), "unkown(-1)"},
 	}
 	for _, test := range tests {
@@ -90,6 +96,23 @@ func TestValidResource(t *testing.T) {
 		{"dominio.com", xlist.Domain, true},
 		{"www.dominio.com", xlist.Domain, true},
 		{"-sdf.com", xlist.Domain, false},
+		//test md5
+		{"c9ef1a05668261b882e9267af006f78d", xlist.MD5, true},
+		{"C9EF1A05668261B882e9267af006f78d", xlist.MD5, true},
+		{"nidecona", xlist.MD5, false},
+		{"x9ef1a05668261b882e9267af006f78d", xlist.MD5, false},
+		{"0c9ef1a05668261b882e9267af006f78d", xlist.MD5, false},
+		//test sha1
+		{"4544f891cb3c190366bc5d0d331ae17e254b26e6", xlist.SHA1, true},
+		{"4544f891CB3C190366BC5d0D331AE17E254B26E6", xlist.SHA1, true},
+		{"nidecona", xlist.SHA1, false},
+		{"X544f891CB3C190366BC5d0D331AE17E254B26E6", xlist.SHA1, false},
+		//test sha256
+		{"00015b14c28c2951f6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256, true},
+		{"00015b14C28C2951f6D628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256, true},
+		{"nidecona", xlist.SHA256, false},
+		{"X0015b14C28C2951f6D628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256, false},
+
 		//unexpected
 		{"kk.com", xlist.Resource(-1), false},
 	}
@@ -112,11 +135,22 @@ func TestResourceType(t *testing.T) {
 		{"fe80::3289:ad8e:8259:c878", xlist.IPv6},
 		//test domain
 		{"www.dominio.com", xlist.Domain},
+		//test md5
+		{"c9ef1a05668261b882e9267af006f78d", xlist.MD5},
+		//test sha1
+		{"4544f891cb3c190366bc5d0d331ae17e254b26e6", xlist.SHA1},
+		//test sha256
+		{"00015b14c28c2951f6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256},
 		//unexpected
 		{"-12.34.23.", xlist.Resource(-1)},
 	}
+	corder := []xlist.Resource{
+		xlist.IPv4, xlist.IPv6,
+		xlist.MD5, xlist.SHA1, xlist.SHA256,
+		xlist.Domain,
+	}
 	for _, test := range tests {
-		got, err := xlist.ResourceType(test.name, xlist.Resources)
+		got, err := xlist.ResourceType(test.name, corder)
 		if test.want == xlist.Resource(-1) {
 			if err == nil {
 				t.Errorf("ResourceType(%v) = %v, %v", test.name, got, err)
@@ -138,10 +172,17 @@ func TestDoValidation(t *testing.T) {
 		{"12.34.23.1", xlist.IPv4, nil},
 		{"fe80::3289:ad8e:8259:c878", xlist.IPv6, nil},
 		{"www.dominio.com", xlist.Domain, nil},
+		{"c9ef1a05668261b882e9267af006f78d", xlist.MD5, nil},
+		{"4544f891cb3c190366bc5d0d331ae17e254b26e6", xlist.SHA1, nil},
+		{"00015b14c28c2951f6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256, nil},
 		// not valid
 		{"12.11", xlist.IPv4, xlist.ErrBadResourceFormat},
 		{"12.11", xlist.IPv6, xlist.ErrBadResourceFormat},
 		{"-www.com", xlist.Domain, xlist.ErrBadResourceFormat},
+		{"X9ef1a05668261b882e9267af006f78d", xlist.MD5, xlist.ErrBadResourceFormat},
+		{"X544f891cb3c190366bc5d0d331ae17e254b26e6", xlist.SHA1, xlist.ErrBadResourceFormat},
+		{"X0015b14c28c2951f6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256, xlist.ErrBadResourceFormat},
+
 		//unexpected
 		{"12.34.23.2", xlist.Resource(-1), xlist.ErrResourceNotSupported},
 		{"12.34.23.3", xlist.Resource(10), xlist.ErrResourceNotSupported},
@@ -165,6 +206,9 @@ func TestCanonicalize(t *testing.T) {
 		{"fe80::3289:ad8e:8259:c878", xlist.IPv6, true, "fe80::3289:ad8e:8259:c878"},
 		{"fd8c:15c7:33f2:ed00:b5cb:bbdf:8266:fa50", xlist.IPv6, true, "fd8c:15c7:33f2:ed00:b5cb:bbdf:8266:fa50"},
 		{"www.dominio.com", xlist.Domain, true, "www.dominio.com"},
+		{"c9ef1a05668261b882e9267af006f78d", xlist.MD5, true, "c9ef1a05668261b882e9267af006f78d"},
+		{"4544f891cb3c190366bc5d0d331ae17e254b26e6", xlist.SHA1, true, "4544f891cb3c190366bc5d0d331ae17e254b26e6"},
+		{"00015b14c28c2951f6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256, true, "00015b14c28c2951f6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8"},
 		// not canonical
 		{"fe80::3289:ad8e:8259:c878", xlist.IPv6, true, "fe80::3289:ad8e:8259:c878"},
 		{"FE80::3289:AD8E:8259:c878", xlist.IPv6, true, "fe80::3289:ad8e:8259:c878"},
@@ -172,10 +216,15 @@ func TestCanonicalize(t *testing.T) {
 		{"fd8c:15c7:33f2:ed00::bbdf:8266:fa50", xlist.IPv6, true, "fd8c:15c7:33f2:ed00:0:bbdf:8266:fa50"},
 		{"fd8c:15c7:33f2:0000:0000:bbdf:8266:fa50", xlist.IPv6, true, "fd8c:15c7:33f2::bbdf:8266:fa50"},
 		{"WWW.DOMINIO.com", xlist.Domain, true, "www.dominio.com"},
+		{"C9EF1A05668261B882E9267AF006F78D", xlist.MD5, true, "c9ef1a05668261b882e9267af006f78d"},
+		{"4544f891CB3C190366BC5D0d331ae17e254b26e6", xlist.SHA1, true, "4544f891cb3c190366bc5d0d331ae17e254b26e6"},
+		{"00015B14C28C2951F6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256, true, "00015b14c28c2951f6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8"},
+
 		// not valid
 		{"12.11", xlist.IPv4, false, "12.11"},
 		{"12.11", xlist.IPv6, false, "12.11"},
 		{"-www.com", xlist.Domain, false, "-www.com"},
+		{"X9ef1a05668261b882e9267af006f78d", xlist.MD5, false, "X9ef1a05668261b882e9267af006f78d"},
 	}
 	for _, test := range tests {
 		gotName, got := xlist.Canonicalize(test.name, test.resource)
@@ -228,6 +277,10 @@ func TestClearResourceDups(t *testing.T) {
 			[]xlist.Resource{xlist.IPv6, xlist.IPv4}},
 		{[]xlist.Resource{xlist.IPv6, xlist.IPv4, xlist.IPv6, xlist.Domain, xlist.Domain},
 			[]xlist.Resource{xlist.IPv6, xlist.IPv4, xlist.Domain}},
+		{[]xlist.Resource{xlist.IPv4, xlist.MD5, xlist.IPv6, xlist.MD5, xlist.IPv4},
+			[]xlist.Resource{xlist.IPv4, xlist.MD5, xlist.IPv6}},
+		{[]xlist.Resource{xlist.IPv4, xlist.SHA256, xlist.IPv6, xlist.SHA1, xlist.IPv4, xlist.SHA256},
+			[]xlist.Resource{xlist.IPv4, xlist.SHA256, xlist.IPv6, xlist.SHA1}},
 	}
 	for _, test := range tests {
 		got := xlist.ClearResourceDups(test.in)
