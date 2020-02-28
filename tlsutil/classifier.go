@@ -4,11 +4,22 @@ package tlsutil
 
 import (
 	"context"
-
-	"github.com/luids-io/core/brain/classify"
 )
 
 // Classifier for tls protocol data
 type Classifier interface {
-	ClassifyConnections(context.Context, []*ConnectionData) ([]classify.Response, error)
+	// ClassifyConnections must return responses in the same order
+	ClassifyConnections(context.Context, []*ConnectionData) ([]ClassifyResponse, error)
+}
+
+// ClassifyResponse stores classification results
+type ClassifyResponse struct {
+	Results []ClassifyResult
+	Err     error
+}
+
+// ClassifyResult stores label and probability
+type ClassifyResult struct {
+	Label string
+	Prob  float32
 }
