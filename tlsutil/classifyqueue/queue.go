@@ -27,6 +27,7 @@ func newQueue(s int, d time.Duration, p processQueueFn) *queue {
 		size:     s,
 		interval: d,
 		reqC:     make(chan *tlsutil.ConnectionData, s),
+		process:  p,
 	}
 	go q.run()
 	return q
