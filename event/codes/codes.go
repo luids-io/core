@@ -29,10 +29,11 @@ const (
 	NFQUnlistedIP event.Code = 10011
 
 	//TLS processor
-	TLSListedSNI    event.Code = 10020
-	TLSUnlistedSNI  event.Code = 10021
-	TLSInvalidCerts event.Code = 10022
-	TLSNonTLSData   event.Code = 10023
+	TLSListedSNI       event.Code = 10020
+	TLSUnlistedSNI     event.Code = 10021
+	TLSInvalidCerts    event.Code = 10022
+	TLSNonTLSData      event.Code = 10023
+	TLSMalwareDetected event.Code = 10024
 )
 
 var registry = []item{
@@ -57,6 +58,7 @@ var registry = []item{
 	{TLSUnlistedSNI, "TLSUnlistedSNI", "SNI [data.listed] in connection [data.ipsrc] -> [data.ipdst]"},
 	{TLSInvalidCerts, "TLSInvalidCerts", "Invalid certs validating SNI [data.sni] with subject [data.subject] in connection [data.ipsrc] -> [data.ipdst]"},
 	{TLSNonTLSData, "TLSNonTLSData", "Not TLS data in connection [data.ipsrc] -> [data.ipdst]"},
+	{TLSMalwareDetected, "TLSMalwareDetected", "Possible malware in TLS connection [data.ipsrc] -> [data.ipdst] with probability [data.prob]"},
 }
 
 type item struct {
