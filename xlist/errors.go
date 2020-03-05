@@ -4,9 +4,10 @@ package xlist
 
 import "errors"
 
-// Some standard errors returned by check interfaces
+// Some standard errors returned by List interfaces
 var (
-	ErrResourceNotSupported = errors.New("resource is not supported")
-	ErrBadResourceFormat    = errors.New("bad format in request")
-	ErrListNotAvailable     = errors.New("list is not available")
+	ErrNotImplemented = errors.New("not implemented")
+	ErrBadRequest     = errors.New("bad request")
+	ErrNotAvailable   = errors.New("not available")
+	ErrReadOnlyMode   = errors.New("read only mode")
 )

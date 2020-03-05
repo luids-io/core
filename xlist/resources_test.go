@@ -176,16 +176,16 @@ func TestDoValidation(t *testing.T) {
 		{"4544f891cb3c190366bc5d0d331ae17e254b26e6", xlist.SHA1, nil},
 		{"00015b14c28c2951f6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256, nil},
 		// not valid
-		{"12.11", xlist.IPv4, xlist.ErrBadResourceFormat},
-		{"12.11", xlist.IPv6, xlist.ErrBadResourceFormat},
-		{"-www.com", xlist.Domain, xlist.ErrBadResourceFormat},
-		{"X9ef1a05668261b882e9267af006f78d", xlist.MD5, xlist.ErrBadResourceFormat},
-		{"X544f891cb3c190366bc5d0d331ae17e254b26e6", xlist.SHA1, xlist.ErrBadResourceFormat},
-		{"X0015b14c28c2951f6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256, xlist.ErrBadResourceFormat},
+		{"12.11", xlist.IPv4, xlist.ErrBadRequest},
+		{"12.11", xlist.IPv6, xlist.ErrBadRequest},
+		{"-www.com", xlist.Domain, xlist.ErrBadRequest},
+		{"X9ef1a05668261b882e9267af006f78d", xlist.MD5, xlist.ErrBadRequest},
+		{"X544f891cb3c190366bc5d0d331ae17e254b26e6", xlist.SHA1, xlist.ErrBadRequest},
+		{"X0015b14c28c2951f6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256, xlist.ErrBadRequest},
 
 		//unexpected
-		{"12.34.23.2", xlist.Resource(-1), xlist.ErrResourceNotSupported},
-		{"12.34.23.3", xlist.Resource(10), xlist.ErrResourceNotSupported},
+		{"12.34.23.2", xlist.Resource(-1), xlist.ErrNotImplemented},
+		{"12.34.23.3", xlist.Resource(10), xlist.ErrNotImplemented},
 	}
 	for _, test := range tests {
 		_, _, got := xlist.DoValidation(context.Background(), test.name, test.resource, true)
@@ -256,7 +256,7 @@ func TestDoValidationContext(t *testing.T) {
 	}
 	// now we test with force enabled...
 	_, ctx, err = xlist.DoValidation(ctx, name, resource, true)
-	if err != xlist.ErrBadResourceFormat {
+	if err != xlist.ErrBadRequest {
 		t.Errorf("DoValidation(ctx, %v, %v, true) = err(%v)", name, resource, err)
 	}
 }

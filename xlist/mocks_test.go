@@ -22,10 +22,10 @@ func (l mockList) Check(ctx context.Context, name string, res xlist.Resource) (x
 		return xlist.Response{}, err
 	}
 	if !res.InArray(l.resources) {
-		return xlist.Response{}, xlist.ErrResourceNotSupported
+		return xlist.Response{}, xlist.ErrNotImplemented
 	}
 	if l.fail {
-		return xlist.Response{}, xlist.ErrListNotAvailable
+		return xlist.Response{}, xlist.ErrNotAvailable
 	}
 	// if l.lazy > 0 {
 	// 	time.Sleep(l.lazy)
@@ -35,7 +35,7 @@ func (l mockList) Check(ctx context.Context, name string, res xlist.Resource) (x
 
 func (l mockList) Ping() error {
 	if l.fail {
-		return xlist.ErrListNotAvailable
+		return xlist.ErrNotAvailable
 	}
 	return nil
 }
@@ -58,7 +58,7 @@ func (c mockContainer) Check(ctx context.Context, name string, res xlist.Resourc
 		return xlist.Response{}, err
 	}
 	if !res.InArray(c.resources) {
-		return xlist.Response{}, xlist.ErrResourceNotSupported
+		return xlist.Response{}, xlist.ErrNotImplemented
 	}
 	for _, checker := range c.lists {
 		resp, err := checker.Check(ctx, name, res)
