@@ -47,3 +47,8 @@ type Response struct {
 // NeverCache is a special value for TTL. If TTLs has this value, caches
 // should not store the response
 const NeverCache = -1
+
+// ListFinder interface for lists
+type ListFinder interface {
+	FindListByID(string) (List, bool)
+}
