@@ -23,9 +23,9 @@ type ResolvData struct {
 	//query info
 	QID              uint16 `json:"qid"`
 	Name             string `json:"name"`
-	CheckingDisabled bool   `json:"checkingDisabled"`
+	CheckingDisabled bool   `json:"checking_disabled"`
 	//response info
-	ReturnCode        uint16   `json:"returnCode"`
-	AuthenticatedData bool     `json:"authenticatedData"`
+	ReturnCode        int      `json:"return_code"`
+	AuthenticatedData bool     `json:"authenticated_data"`
 	Resolved          []net.IP `json:"resolved,omitempty" bson:",omitempty"`
 }
