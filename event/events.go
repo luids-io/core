@@ -177,6 +177,34 @@ func (l *Level) UnmarshalJSON(data []byte) error {
 	}
 }
 
+// ToEventLevel returns event level from string, raise if ok and error if bad value
+func ToEventLevel(s string) (level Level, raise bool, err error) {
+	switch s {
+	case "":
+		raise = false
+	case "none":
+		raise = false
+	case "info":
+		raise = true
+		level = Info
+	case "low":
+		raise = true
+		level = Low
+	case "medium":
+		raise = true
+		level = Medium
+	case "high":
+		raise = true
+		level = High
+	case "critical":
+		raise = true
+		level = Critical
+	default:
+		err = errors.New("invalid event level value")
+	}
+	return
+}
+
 // Set appends data to an event
 func (e *Event) Set(field string, v interface{}) error {
 	if !fieldRegExp.MatchString(field) {
