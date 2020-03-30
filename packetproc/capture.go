@@ -1,6 +1,6 @@
-// Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. See LICENSE.
+// Copyright 2020 Luis Guillén Civera <luisguillenc@gmail.com>. See LICENSE.
 
-package capture
+package packetproc
 
 import (
 	"github.com/google/gopacket"
@@ -9,12 +9,6 @@ import (
 // Analyzer interface defines analyzer methods
 type Analyzer interface {
 	SendEtherPacket(gopacket.Packet) error
-}
-
-//Processor interface defines packet processor
-type Processor interface {
-	Register(key string, src *gopacket.PacketSource) error
-	Unregister(key string) error
 }
 
 // Writer interface is used for write packages to persistant storage
