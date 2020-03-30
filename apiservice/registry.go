@@ -5,25 +5,23 @@ package apiservice
 import (
 	"errors"
 	"fmt"
-	"sort"
 	"strings"
 	"sync"
 )
 
 // Registry stores service items
 type Registry struct {
-	services map[string]serviceItem
+	list     []string
+	services map[string]Service
 	mu       sync.RWMutex
-}
-
-type serviceItem struct {
-	id      string
-	service Service
 }
 
 // NewRegistry instantiates a new registry
 func NewRegistry() *Registry {
-	return &Registry{services: make(map[string]serviceItem)}
+	return &Registry{
+		services: make(map[string]Service),
+		list:     make([]string, 0),
+	}
 }
 
 // Register a service using an id and a Service interface
@@ -34,7 +32,8 @@ func (r *Registry) Register(id string, svc Service) error {
 	if ok {
 		return errors.New("service already exists")
 	}
-	r.services[id] = serviceItem{id: id, service: svc}
+	r.services[id] = svc
+	r.list = append(r.list, id)
 	return nil
 }
 
@@ -42,22 +41,19 @@ func (r *Registry) Register(id string, svc Service) error {
 func (r *Registry) GetService(id string) (Service, bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	i, ok := r.services[id]
+	svc, ok := r.services[id]
 	if !ok {
 		return nil, false
 	}
-	return i.service, true
+	return svc, true
 }
 
 // ListServices implements Discover interface
 func (r *Registry) ListServices() []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	list := make([]string, 0, len(r.services))
-	for k := range r.services {
-		list = append(list, k)
-	}
-	sort.Strings(list)
+	list := make([]string, len(r.list), len(r.list))
+	copy(list, r.list)
 	return list
 }
 
@@ -65,10 +61,12 @@ func (r *Registry) ListServices() []string {
 func (r *Registry) Ping() error {
 	errs := make([]string, 0, len(r.services))
 	for _, id := range r.ListServices() {
-		svc, ok := r.services[id]
+		svc, ok := r.GetService(id)
 		if ok {
-			err := svc.service.Ping()
-			errs = append(errs, fmt.Sprintf("%s: %s", svc.id, err.Error()))
+			err := svc.Ping()
+			if err != nil {
+				errs = append(errs, fmt.Sprintf("%s: %s", id, err.Error()))
+			}
 		}
 	}
 	if len(errs) > 0 {
@@ -81,9 +79,9 @@ func (r *Registry) Ping() error {
 func (r *Registry) CloseAll() error {
 	errs := make([]string, 0, len(r.services))
 	for _, id := range r.ListServices() {
-		svc, ok := r.services[id]
+		svc, ok := r.GetService(id)
 		if ok {
-			err := svc.service.Close()
+			err := svc.Close()
 			if err != nil {
 				errs = append(errs, err.Error())
 			}
