@@ -9,7 +9,8 @@ import (
 	"sync"
 
 	"github.com/google/gopacket"
-	"github.com/luisguillenc/yalogi"
+
+	"github.com/luids-io/core/utils/yalogi"
 )
 
 // Processor defines main Process function

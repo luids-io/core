@@ -9,8 +9,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/luisguillenc/grpctls"
-	"github.com/luisguillenc/yalogi"
+	"github.com/luids-io/core/utils/grpctls"
+	"github.com/luids-io/core/utils/yalogi"
 )
 
 // ServiceDef is used for define and construct microservices

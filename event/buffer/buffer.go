@@ -7,7 +7,7 @@ import (
 	"errors"
 
 	"github.com/luids-io/core/event"
-	"github.com/luisguillenc/yalogi"
+	"github.com/luids-io/core/utils/yalogi"
 )
 
 // Buffer implements a buffer for async event notification

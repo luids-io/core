@@ -8,9 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luisguillenc/yalogi"
-
 	"github.com/luids-io/core/tlsutil"
+	"github.com/luids-io/core/utils/yalogi"
 )
 
 // Dispatcher function for process classification responses
