@@ -3,19 +3,18 @@
 package tlsutil
 
 import (
-	"github.com/luisguillenc/tlslayer"
-	"github.com/luisguillenc/tlslayer/tlsproto"
+	"github.com/luids-io/core/tlsutil/layer"
 )
 
 // ClientHelloData stores clienthello information
 type ClientHelloData struct {
-	ClientVersion   tlslayer.ProtocolVersion     `json:"clientVersion"`
-	RandomLen       int                          `json:"randomLen"`
-	SessionIDLen    int                          `json:"sessionIDLen"`
-	SessionID       []byte                       `json:"sessionID,omitempty" bson:",omitempty"`
-	CipherSuitesLen int                          `json:"cipherSuitesLen"`
-	CipherSuites    []tlsproto.CipherSuite       `json:"cipherSuites"`
-	CompressMethods []tlsproto.CompressionMethod `json:"compressMethods"`
+	ClientVersion   layer.ProtocolVersion     `json:"clientVersion"`
+	RandomLen       int                       `json:"randomLen"`
+	SessionIDLen    int                       `json:"sessionIDLen"`
+	SessionID       []byte                    `json:"sessionID,omitempty" bson:",omitempty"`
+	CipherSuitesLen int                       `json:"cipherSuitesLen"`
+	CipherSuites    []layer.CipherSuite       `json:"cipherSuites"`
+	CompressMethods []layer.CompressionMethod `json:"compressMethods"`
 
 	ExtensionLen  int             `json:"extensionLen"`
 	Extensions    []ExtensionItem `json:"extensions,omitempty" bson:",omitempty"`
@@ -28,12 +27,12 @@ type ClientHelloData struct {
 
 // ServerHelloData stores serverhello information
 type ServerHelloData struct {
-	ServerVersion     tlslayer.ProtocolVersion   `json:"serverVersion"`
-	RandomLen         int                        `json:"randomLen"`
-	SessionIDLen      int                        `json:"sessionIDLen"`
-	SessionID         []byte                     `json:"sessionID,omitempty" bson:",omitempty"`
-	CipherSuiteSel    tlsproto.CipherSuite       `json:"cipherSuiteSel"`
-	CompressMethodSel tlsproto.CompressionMethod `json:"compressMethodSel"`
+	ServerVersion     layer.ProtocolVersion   `json:"serverVersion"`
+	RandomLen         int                     `json:"randomLen"`
+	SessionIDLen      int                     `json:"sessionIDLen"`
+	SessionID         []byte                  `json:"sessionID,omitempty" bson:",omitempty"`
+	CipherSuiteSel    layer.CipherSuite       `json:"cipherSuiteSel"`
+	CompressMethodSel layer.CompressionMethod `json:"compressMethodSel"`
 
 	ExtensionLen  int             `json:"extensionLen"`
 	Extensions    []ExtensionItem `json:"extensions,omitempty" bson:",omitempty"`
@@ -42,19 +41,19 @@ type ServerHelloData struct {
 
 // ExtensionItem stores metadata information of extensions
 type ExtensionItem struct {
-	Type tlsproto.ExtensionType `json:"type"`
-	Len  uint16                 `json:"len"`
+	Type layer.ExtensionType `json:"type"`
+	Len  uint16              `json:"len"`
 }
 
 // DecodedInfo stores information of extensions
 type DecodedInfo struct {
-	SNI                 string                        `json:"sni,omitempty" bson:",omitempty"`
-	SignatureSchemes    []tlsproto.SignatureScheme    `json:"signatureSchemes,omitempty" bson:",omitempty"`
-	SupportedVersions   []tlsproto.SupportedVersion   `json:"supportedVersions,omitempty" bson:",omitempty"`
-	SupportedGroups     []tlsproto.SupportedGroup     `json:"supportedGroups,omitempty" bson:",omitempty"`
-	ECPointFormats      []tlsproto.ECPointFormat      `json:"ecPointFormats,omitempty" bson:",omitempty"`
-	OSCP                bool                          `json:"oscp"`
-	ALPNs               []string                      `json:"alpns,omitempty" bson:",omitempty"`
-	KeyShareEntries     []tlsproto.KeyShareEntry      `json:"keyShareEntries,omitempty" bson:",omitempty"`
-	PSKKeyExchangeModes []tlsproto.PSKKeyExchangeMode `json:"pskKeyExchangeModes,omitempty" bson:",omitempty"`
+	SNI                 string                     `json:"sni,omitempty" bson:",omitempty"`
+	SignatureSchemes    []layer.SignatureScheme    `json:"signatureSchemes,omitempty" bson:",omitempty"`
+	SupportedVersions   []layer.SupportedVersion   `json:"supportedVersions,omitempty" bson:",omitempty"`
+	SupportedGroups     []layer.SupportedGroup     `json:"supportedGroups,omitempty" bson:",omitempty"`
+	ECPointFormats      []layer.ECPointFormat      `json:"ecPointFormats,omitempty" bson:",omitempty"`
+	OSCP                bool                       `json:"oscp"`
+	ALPNs               []string                   `json:"alpns,omitempty" bson:",omitempty"`
+	KeyShareEntries     []layer.KeyShareEntry      `json:"keyShareEntries,omitempty" bson:",omitempty"`
+	PSKKeyExchangeModes []layer.PSKKeyExchangeMode `json:"pskKeyExchangeModes,omitempty" bson:",omitempty"`
 }
