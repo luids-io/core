@@ -8,7 +8,7 @@ import (
 
 // Analyzer interface defines analyzer methods
 type Analyzer interface {
-	SendEtherPacket(gopacket.Packet) error
+	SendEtherPacket(data []byte, md *gopacket.PacketMetadata) error
 }
 
 // Writer interface is used for write packages to persistant storage
