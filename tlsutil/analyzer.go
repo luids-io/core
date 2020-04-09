@@ -9,7 +9,7 @@ import (
 
 // AnalyzerFactory interface is used for create Analyzer services
 type AnalyzerFactory interface {
-	NewAnalyzer() Analyzer
+	NewAnalyzer(name string) (Analyzer, error)
 }
 
 // Analyzer interface defines analyzer methods
