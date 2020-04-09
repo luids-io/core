@@ -204,7 +204,7 @@ func (s *service) doStart(src *pcktSource) error {
 	s.logger.Infof("starting packet source %s", src.name)
 	hooks := NewHooks()
 	for _, p := range s.plugins {
-		p.Register(hooks)
+		p.Register(src.name, hooks)
 	}
 	var err error
 	src.stop, src.errCh, err = src.proc.Process(src.name, src.source, hooks)
