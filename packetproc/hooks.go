@@ -10,7 +10,7 @@ import (
 
 type (
 	//CbPacket defines a callback on packet
-	CbPacket func(gopacket.Packet) (bool, Verdict, error)
+	CbPacket func(gopacket.Packet, time.Time) (bool, Verdict, error)
 	//CbTick defines callback for tick routines
 	CbTick func(time.Time, time.Time) error
 	//CbClose defines callback for cleanups
@@ -79,7 +79,7 @@ func (h *HooksRunner) Layers() []gopacket.LayerType {
 // Packet executes all registered onPacket hooks for the layerType
 // passed in a secuencial way. If some of the hooks returns true, then
 // the execution stops and returns true.
-func (h *HooksRunner) Packet(layer gopacket.LayerType, packet gopacket.Packet) (bool, Verdict, []error) {
+func (h *HooksRunner) Packet(layer gopacket.LayerType, packet gopacket.Packet, ts time.Time) (bool, Verdict, []error) {
 	callbacks, ok := h.hooks.onPacket[layer]
 	if ok {
 		var v Verdict
@@ -88,7 +88,7 @@ func (h *HooksRunner) Packet(layer gopacket.LayerType, packet gopacket.Packet) (
 		for _, cb := range callbacks {
 			var err error
 			if match, _ := cb.f.Match(packet); match {
-				stop, v, err = cb.fn(packet)
+				stop, v, err = cb.fn(packet, ts)
 				if err != nil {
 					errs = append(errs, err)
 				}
