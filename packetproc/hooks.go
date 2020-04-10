@@ -17,27 +17,25 @@ type (
 	CbClose func() error
 )
 
+// OnPacket stores callbacks by layer
+type OnPacket struct {
+	Layer    gopacket.LayerType
+	Filter   Filter
+	Callback CbPacket
+}
+
 // Hooks is responsible for packet processor
 type Hooks struct {
 	layers   []gopacket.LayerType
-	onPacket map[gopacket.LayerType][]onPacket
+	onPacket map[gopacket.LayerType][]OnPacket
+	sorted   []OnPacket
 	onTick   []CbTick
 	onClose  []CbClose
 }
 
-type onPacket struct {
-	f  Filter
-	fn CbPacket
-}
-
 // NewHooks returns a new hooks collection
 func NewHooks() *Hooks {
-	return &Hooks{
-		layers:   make([]gopacket.LayerType, 0),
-		onPacket: make(map[gopacket.LayerType][]onPacket),
-		onTick:   make([]CbTick, 0),
-		onClose:  make([]CbClose, 0),
-	}
+	return &Hooks{onPacket: make(map[gopacket.LayerType][]OnPacket)}
 }
 
 // OnPacket adds a callback function on new packet
@@ -45,9 +43,11 @@ func (h *Hooks) OnPacket(layer gopacket.LayerType, f Filter, fn CbPacket) {
 	callbacks, ok := h.onPacket[layer]
 	if !ok {
 		h.layers = append(h.layers, layer)
-		callbacks = make([]onPacket, 0)
+		callbacks = make([]OnPacket, 0)
 	}
-	callbacks = append(callbacks, onPacket{f: f, fn: fn})
+	cb := OnPacket{Layer: layer, Filter: f, Callback: fn}
+	callbacks = append(callbacks, cb)
+	h.sorted = append(h.sorted, cb)
 	h.onPacket[layer] = callbacks
 }
 
@@ -61,67 +61,41 @@ func (h *Hooks) OnClose(fn CbClose) {
 	h.onClose = append(h.onClose, fn)
 }
 
-// HooksRunner executes Hooks
-type HooksRunner struct {
-	hooks *Hooks
+// Layers return registered layers
+func (h *Hooks) Layers() []gopacket.LayerType {
+	ret := make([]gopacket.LayerType, len(h.layers), len(h.layers))
+	copy(ret, h.layers)
+	return ret
 }
 
-// NewHooksRunner returns a HooksRunner
-func NewHooksRunner(h *Hooks) *HooksRunner {
-	return &HooksRunner{hooks: h}
-}
-
-// Layers returns registered layers
-func (h *HooksRunner) Layers() []gopacket.LayerType {
-	return h.hooks.layers
-}
-
-// Packet executes all registered onPacket hooks for the layerType
-// passed in a secuencial way. If some of the hooks returns true, then
-// the execution stops and returns true.
-func (h *HooksRunner) Packet(layer gopacket.LayerType, packet gopacket.Packet, ts time.Time) (bool, Verdict, []error) {
-	callbacks, ok := h.hooks.onPacket[layer]
-	if ok {
-		var v Verdict
-		var stop bool
-		errs := make([]error, 0, len(callbacks))
-		for _, cb := range callbacks {
-			var err error
-			if match, _ := cb.f.Match(packet); match {
-				stop, v, err = cb.fn(packet, ts)
-				if err != nil {
-					errs = append(errs, err)
-				}
-				if stop {
-					return true, v, errs
-				}
-			}
-		}
-		return false, v, errs
+// PacketHooksByLayer returns on packet hooks by layer
+func (h *Hooks) PacketHooksByLayer(layer gopacket.LayerType) []OnPacket {
+	stored, ok := h.onPacket[layer]
+	if !ok {
+		return []OnPacket{}
 	}
-	return false, Default, nil
+	ret := make([]OnPacket, len(stored), len(stored))
+	copy(ret, stored)
+	return ret
 }
 
-// Tick executes onTick registered hooks. It pass the last timestamp.
-func (h *HooksRunner) Tick(lastTick, lastPacket time.Time) []error {
-	errs := make([]error, 0, len(h.hooks.onTick))
-	for _, cb := range h.hooks.onTick {
-		err := cb(lastTick, lastPacket)
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-	return errs
+// PacketHooks returns on packet hooks in order
+func (h *Hooks) PacketHooks() []OnPacket {
+	ret := make([]OnPacket, len(h.sorted), len(h.sorted))
+	copy(ret, h.sorted)
+	return ret
 }
 
-// Close executes on close registered hooks.
-func (h *HooksRunner) Close() []error {
-	errs := make([]error, 0, len(h.hooks.onClose))
-	for _, cb := range h.hooks.onClose {
-		err := cb()
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-	return errs
+// TickHooks returns on tick hooks
+func (h *Hooks) TickHooks() []CbTick {
+	ret := make([]CbTick, len(h.onTick), len(h.onTick))
+	copy(ret, h.onTick)
+	return ret
+}
+
+// CloseHooks returns on close hooks
+func (h *Hooks) CloseHooks() []CbClose {
+	ret := make([]CbClose, len(h.onClose), len(h.onClose))
+	copy(ret, h.onClose)
+	return ret
 }
