@@ -14,6 +14,8 @@ type Plugin interface {
 	Register(source string, hooks *Hooks)
 	// Layers returns layers required by the plugin
 	Layers() []gopacket.LayerType
+	// CleanUp of the plugin
+	CleanUp()
 }
 
 // Action defines interface for actions (used by plugins)
