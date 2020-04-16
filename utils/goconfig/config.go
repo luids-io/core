@@ -10,10 +10,11 @@ import (
 
 // Config is the main configuration struct
 type Config struct {
-	v        *viper.Viper
-	program  string
-	snames   map[string]bool
-	sections []Section
+	v          *viper.Viper
+	program    string
+	snames     map[string]bool
+	sections   []Section
+	validators []Validator
 }
 
 // Section represents configuration sections
@@ -39,6 +40,9 @@ type Configurable interface {
 	//Dump returns string
 	Dump() string
 }
+
+// Validator defines additional validators
+type Validator func(cfg *Config) error
 
 // New creates a configuration with sections passed
 func New(program string, sections ...Section) (*Config, error) {
@@ -127,6 +131,11 @@ func (c *Config) Dump() string {
 	return output
 }
 
+// AddValidator add validator to object
+func (c *Config) AddValidator(v Validator) {
+	c.validators = append(c.validators, v)
+}
+
 func (c *Config) loadFromEnv() {
 	c.v.SetEnvPrefix(c.program)
 	c.v.AutomaticEnv()
@@ -176,6 +185,11 @@ func (c *Config) validate() error {
 				}
 				return fmt.Errorf("section '%s': %v", s.Name, err)
 			}
+		}
+	}
+	for _, v := range c.validators {
+		if err := v(c); err != nil {
+			return err
 		}
 	}
 	return nil
