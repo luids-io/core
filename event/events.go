@@ -246,6 +246,16 @@ func (e *Event) PrintFields() string {
 	return s
 }
 
+// SetDefaultSource allows change default notify events source
+func SetDefaultSource(s Source) {
+	defaultSource = s
+}
+
+// GetDefaultSource returns default notify events source
+func GetDefaultSource() Source {
+	return defaultSource
+}
+
 var defaultSource Source
 
 var fieldRegExp, _ = regexp.Compile(`^[A-Za-z][A-Za-z0-9_\.]*$`)
