@@ -20,14 +20,20 @@ import (
 
 // Event stores event info.
 type Event struct {
-	ID       string                 `json:"id" bson:"_id"`
-	Type     Type                   `json:"type"`
-	Code     Code                   `json:"code"`
-	Level    Level                  `json:"level"`
-	Created  time.Time              `json:"created"`
-	Received time.Time              `json:"received"`
-	Source   Source                 `json:"source"`
-	Data     map[string]interface{} `json:"data,omitempty"`
+	ID         string                 `json:"id" bson:"_id"`
+	Type       Type                   `json:"type"`
+	Code       Code                   `json:"code"`
+	Level      Level                  `json:"level"`
+	Created    time.Time              `json:"created"`
+	Source     Source                 `json:"source"`
+	Processors []ProcessInfo          `json:"processors,omitempty"`
+	Data       map[string]interface{} `json:"data,omitempty"`
+}
+
+// ProcessInfo stores event processing info
+type ProcessInfo struct {
+	Received  time.Time `json:"received"`
+	Processor Source    `json:"processor"`
 }
 
 // Source stores event source information.
@@ -39,6 +45,14 @@ type Source struct {
 
 func (s Source) String() string {
 	return fmt.Sprintf("%s.%s[%s]", s.Hostname, s.Program, s.Instance)
+}
+
+// Equals returns true if sources are equals
+func (s Source) Equals(o Source) bool {
+	if s.Hostname != o.Hostname || s.Program != o.Program || s.Instance != o.Instance {
+		return false
+	}
+	return true
 }
 
 //New event
