@@ -12,19 +12,39 @@ import (
 var registry = make(map[Code]regItem)
 
 type regItem struct {
-	code Code
-	name string
-	desc string
+	code   Code
+	name   string
+	desc   string
+	fields []FieldMetadata
+}
+
+// FieldMetadata stores metadata of fields
+type FieldMetadata struct {
+	Name     string
+	Type     string
+	Required bool
 }
 
 // RegisterCode register an event code and its message creator
-func RegisterCode(code Code, name string, desc string) {
+func RegisterCode(code Code, name string, desc string, fields []FieldMetadata) {
 	r := regItem{
 		code: code,
 		name: name,
 		desc: desc,
 	}
+	if len(fields) > 0 {
+		r.fields = make([]FieldMetadata, len(fields), len(fields))
+		copy(r.fields, fields)
+	}
 	registry[code] = r
+}
+
+func (i regItem) getFields() map[string]FieldMetadata {
+	fields := make(map[string]FieldMetadata, len(i.fields))
+	for _, f := range i.fields {
+		fields[f.Name] = f
+	}
+	return fields
 }
 
 // Codename returns name of associated code

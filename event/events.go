@@ -260,6 +260,45 @@ func (e *Event) PrintFields() string {
 	return s
 }
 
+// Validate checks event data against registered event codes
+func Validate(e Event) error {
+	i, ok := registry[e.Code]
+	if !ok {
+		return fmt.Errorf("code %v not registered", e.Code)
+	}
+	metas := i.getFields()
+	for field := range e.Data {
+		_, ok := metas[field]
+		if !ok {
+			return fmt.Errorf("data field '%s' undefined", field)
+		}
+	}
+	for field, md := range metas {
+		value, ok := e.Data[field]
+		if !ok {
+			if md.Required {
+				return fmt.Errorf("data field '%s' is required", field)
+			}
+			continue
+		}
+		switch md.Type {
+		case "string":
+			if _, ok := value.(string); !ok {
+				return fmt.Errorf("data field '%s' is not a valid string", field)
+			}
+		case "int":
+			if _, ok := value.(int); !ok {
+				return fmt.Errorf("data field '%s' is not a valid int", field)
+			}
+		case "float":
+			if _, ok := value.(float64); !ok {
+				return fmt.Errorf("data field '%s' is not a valid float", field)
+			}
+		}
+	}
+	return nil
+}
+
 // SetDefaultSource allows change default notify events source
 func SetDefaultSource(s Source) {
 	defaultSource = s
