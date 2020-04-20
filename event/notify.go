@@ -9,13 +9,22 @@ import (
 
 // Notifier is the interface that the notifiers must satisfy
 type Notifier interface {
-	// NotifyEvent returns notification request ID
 	NotifyEvent(ctx context.Context, e Event) (string, error)
 }
 
 // NotifyBuffer interface must be used for event buffering implementations
 type NotifyBuffer interface {
 	PushEvent(e Event) error
+}
+
+// Forwarder is the interface for event forwarding
+type Forwarder interface {
+	ForwardEvent(ctx context.Context, e Event) error
+}
+
+// Archiver is the interface for the event archive
+type Archiver interface {
+	SaveEvent(ctx context.Context, e Event) (string, error)
 }
 
 //default buffer instance

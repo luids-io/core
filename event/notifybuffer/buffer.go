@@ -13,7 +13,6 @@ import (
 // Buffer implements a buffer for async event notification
 type Buffer struct {
 	event.NotifyBuffer
-	validate bool
 	//logger used for errors
 	logger yalogi.Logger
 	//collector
@@ -26,13 +25,11 @@ type Buffer struct {
 }
 
 type bufferOpts struct {
-	logger   yalogi.Logger
-	validate bool
+	logger yalogi.Logger
 }
 
 var defaultBufferOpts = bufferOpts{
-	logger:   yalogi.LogNull,
-	validate: true,
+	logger: yalogi.LogNull,
 }
 
 // Option encapsules options for buffer
@@ -47,13 +44,6 @@ func SetLogger(l yalogi.Logger) Option {
 	}
 }
 
-// DoValidation option enables validation of events against registry
-func DoValidation(b bool) Option {
-	return func(o *bufferOpts) {
-		o.validate = b
-	}
-}
-
 // New returns a new event buffer
 func New(n event.Notifier, size int, opt ...Option) *Buffer {
 	opts := defaultBufferOpts
@@ -62,7 +52,6 @@ func New(n event.Notifier, size int, opt ...Option) *Buffer {
 	}
 	b := &Buffer{
 		logger:   opts.logger,
-		validate: opts.validate,
 		notifier: n,
 		eventCh:  make(chan event.Event, size),
 		close:    make(chan struct{}),
@@ -75,12 +64,6 @@ func New(n event.Notifier, size int, opt ...Option) *Buffer {
 func (b *Buffer) PushEvent(e event.Event) error {
 	if b.closed {
 		return errors.New("buffer is closed")
-	}
-	if b.validate {
-		err := event.Validate(e)
-		if err != nil {
-			return err
-		}
 	}
 	b.eventCh <- e
 	return nil

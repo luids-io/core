@@ -20,15 +20,44 @@ import (
 
 // Event stores event info.
 type Event struct {
-	ID         string                 `json:"id" bson:"_id"`
-	Type       Type                   `json:"type"`
-	Code       Code                   `json:"code"`
-	Level      Level                  `json:"level"`
-	Created    time.Time              `json:"created"`
-	Source     Source                 `json:"source"`
-	Processors []ProcessInfo          `json:"processors,omitempty"`
-	Data       map[string]interface{} `json:"data,omitempty"`
+	// info completed on construction
+	Code    Code                   `json:"code"`
+	Level   Level                  `json:"level"`
+	Created time.Time              `json:"created"`
+	Source  Source                 `json:"source"`
+	Data    map[string]interface{} `json:"data,omitempty"`
+	// info completed by Notifier
+	ID          string        `json:"id" bson:"_id"`
+	Type        Type          `json:"type"`
+	Codename    string        `json:"codename"`
+	Description string        `json:"description"`
+	Processors  []ProcessInfo `json:"processors,omitempty"`
+	Tags        []string      `json:"tags,omitempty"`
 }
+
+// Code defines the code of the event
+type Code int32
+
+// Level defines the level of event
+type Level int8
+
+// Level possible values
+const (
+	Info Level = iota
+	Low
+	Medium
+	High
+	Critical
+)
+
+// Type defines the type of event
+type Type int8
+
+// Type possible values
+const (
+	Undefined Type = iota
+	Security
+)
 
 // ProcessInfo stores event processing info
 type ProcessInfo struct {
@@ -56,9 +85,8 @@ func (s Source) Equals(o Source) bool {
 }
 
 //New event
-func New(t Type, c Code, l Level) Event {
+func New(c Code, l Level) Event {
 	return Event{
-		Type:    t,
 		Code:    c,
 		Level:   l,
 		Created: time.Now(),
@@ -67,17 +95,11 @@ func New(t Type, c Code, l Level) Event {
 	}
 }
 
-// Type defines the type of event
-type Type int8
-
-// Type possible values
-const (
-	Security Type = iota
-)
-
 // String method to return string of IType
 func (i Type) String() string {
 	switch i {
+	case Undefined:
+		return "undefined"
 	case Security:
 		return "security"
 	default:
@@ -89,6 +111,8 @@ func (i Type) String() string {
 func (i Type) MarshalJSON() ([]byte, error) {
 	s := ""
 	switch i {
+	case Undefined:
+		s = "undefined"
 	case Security:
 		s = "security"
 	default:
@@ -104,6 +128,9 @@ func (i *Type) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	switch s {
+	case "undefined":
+		*i = Undefined
+		return nil
 	case "security":
 		*i = Security
 		return nil
@@ -111,21 +138,6 @@ func (i *Type) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("cannot unmarshal type '%s'", s)
 	}
 }
-
-// Code defines the code of the event
-type Code int32
-
-// Level defines the level of event
-type Level int8
-
-// Level possible values
-const (
-	Info Level = iota
-	Low
-	Medium
-	High
-	Critical
-)
 
 // String method to return string of ILevel
 func (l Level) String() string {
@@ -258,45 +270,6 @@ func (e *Event) PrintFields() string {
 		s = s + fmt.Sprintf("%s=%v", field, value)
 	}
 	return s
-}
-
-// Validate checks event data against registered event codes
-func Validate(e Event) error {
-	i, ok := registry[e.Code]
-	if !ok {
-		return fmt.Errorf("code %v not registered", e.Code)
-	}
-	metas := i.getFields()
-	for field := range e.Data {
-		_, ok := metas[field]
-		if !ok {
-			return fmt.Errorf("data field '%s' undefined", field)
-		}
-	}
-	for field, md := range metas {
-		value, ok := e.Data[field]
-		if !ok {
-			if md.Required {
-				return fmt.Errorf("data field '%s' is required", field)
-			}
-			continue
-		}
-		switch md.Type {
-		case "string":
-			if _, ok := value.(string); !ok {
-				return fmt.Errorf("data field '%s' is not a valid string", field)
-			}
-		case "int":
-			if _, ok := value.(int); !ok {
-				return fmt.Errorf("data field '%s' is not a valid int", field)
-			}
-		case "float":
-			if _, ok := value.(float64); !ok {
-				return fmt.Errorf("data field '%s' is not a valid float", field)
-			}
-		}
-	}
-	return nil
 }
 
 // SetDefaultSource allows change default notify events source
