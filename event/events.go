@@ -25,14 +25,14 @@ type Event struct {
 	Level   Level                  `json:"level"`
 	Created time.Time              `json:"created"`
 	Source  Source                 `json:"source"`
-	Data    map[string]interface{} `json:"data,omitempty"`
+	Data    map[string]interface{} `json:"data,omitempty" bson:",omitempty"`
 	// info completed by Notifier
 	ID          string        `json:"id" bson:"_id"`
 	Type        Type          `json:"type"`
 	Codename    string        `json:"codename"`
 	Description string        `json:"description"`
-	Processors  []ProcessInfo `json:"processors,omitempty"`
-	Tags        []string      `json:"tags,omitempty"`
+	Processors  []ProcessInfo `json:"processors,omitempty" bson:",omitempty"`
+	Tags        []string      `json:"tags,omitempty" bson:",omitempty"`
 }
 
 // Code defines the code of the event

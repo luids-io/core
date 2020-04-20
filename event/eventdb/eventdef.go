@@ -39,7 +39,7 @@ func (def *EventDef) Complete(e event.Event) event.Event {
 	ret.Description = def.getDesc(e)
 	if len(def.Tags) > 0 {
 		ret.Tags = make([]string, len(def.Tags), len(def.Tags))
-		copy(e.Tags, def.Tags)
+		copy(ret.Tags, def.Tags)
 	}
 	return ret
 }
