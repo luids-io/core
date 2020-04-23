@@ -274,13 +274,13 @@ func TestClearResourceDups(t *testing.T) {
 		{[]xlist.Resource{xlist.IPv4, xlist.IPv6, xlist.IPv4},
 			[]xlist.Resource{xlist.IPv4, xlist.IPv6}},
 		{[]xlist.Resource{xlist.IPv6, xlist.IPv4, xlist.IPv6},
-			[]xlist.Resource{xlist.IPv6, xlist.IPv4}},
+			[]xlist.Resource{xlist.IPv4, xlist.IPv6}},
 		{[]xlist.Resource{xlist.IPv6, xlist.IPv4, xlist.IPv6, xlist.Domain, xlist.Domain},
-			[]xlist.Resource{xlist.IPv6, xlist.IPv4, xlist.Domain}},
+			[]xlist.Resource{xlist.IPv4, xlist.IPv6, xlist.Domain}},
 		{[]xlist.Resource{xlist.IPv4, xlist.MD5, xlist.IPv6, xlist.MD5, xlist.IPv4},
-			[]xlist.Resource{xlist.IPv4, xlist.MD5, xlist.IPv6}},
+			[]xlist.Resource{xlist.IPv4, xlist.IPv6, xlist.MD5}},
 		{[]xlist.Resource{xlist.IPv4, xlist.SHA256, xlist.IPv6, xlist.SHA1, xlist.IPv4, xlist.SHA256},
-			[]xlist.Resource{xlist.IPv4, xlist.SHA256, xlist.IPv6, xlist.SHA1}},
+			[]xlist.Resource{xlist.IPv4, xlist.IPv6, xlist.SHA1, xlist.SHA256}},
 	}
 	for _, test := range tests {
 		got := xlist.ClearResourceDups(test.in)

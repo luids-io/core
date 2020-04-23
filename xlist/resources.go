@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -251,6 +252,7 @@ func ClearResourceDups(resources []Resource) []Resource {
 			copied[int(r)] = true
 		}
 	}
+	sort.Slice(ret, func(i, j int) bool { return ret[i] < ret[j] })
 	return ret
 }
 
