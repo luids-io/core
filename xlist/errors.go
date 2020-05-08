@@ -6,8 +6,8 @@ import "errors"
 
 // Some standard errors returned by List interfaces
 var (
-	ErrNotImplemented = errors.New("not implemented")
-	ErrBadRequest     = errors.New("bad request")
-	ErrNotAvailable   = errors.New("not available")
-	ErrReadOnlyMode   = errors.New("read only mode")
+	ErrBadRequest   = errors.New("bad request")
+	ErrNotSupported = errors.New("resource not supported")
+	ErrUnavailable  = errors.New("not available")
+	ErrInternal     = errors.New("internal error")
 )

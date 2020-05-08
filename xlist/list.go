@@ -8,20 +8,10 @@ import (
 
 // List is the main interface for RBL lists
 type List interface {
-	Writer
+	ID() string
+	Class() string
 	Checker
-}
-
-// Writer is the interface for write in lists
-type Writer interface {
-	// Append to the list a resource (or group) encoded as string in the format
-	Append(ctx context.Context, name string, r Resource, f Format) error
-	// Remove from the list
-	Remove(ctx context.Context, name string, r Resource, f Format) error
-	// Clear all items in the list
-	Clear(ctx context.Context) error
-	// ReadOnly returns true if the list is read only
-	ReadOnly() (bool, error)
+	ReadOnly() bool
 }
 
 // Checker is the interface for check lists
@@ -47,6 +37,16 @@ type Response struct {
 // NeverCache is a special value for TTL. If TTLs has this value, caches
 // should not store the response
 const NeverCache = -1
+
+// Writer is the interface for write in lists
+type Writer interface {
+	// Append to the list a resource (or group) encoded as string in the format
+	Append(ctx context.Context, name string, r Resource, f Format) error
+	// Remove from the list
+	Remove(ctx context.Context, name string, r Resource, f Format) error
+	// Clear all items in the list
+	Clear(ctx context.Context) error
+}
 
 // ListFinder interface for lists
 type ListFinder interface {

@@ -184,8 +184,8 @@ func TestDoValidation(t *testing.T) {
 		{"X0015b14c28c2951f6d628098ce6853e14300f1b7d6d985e18d508f9807f44d8", xlist.SHA256, xlist.ErrBadRequest},
 
 		//unexpected
-		{"12.34.23.2", xlist.Resource(-1), xlist.ErrNotImplemented},
-		{"12.34.23.3", xlist.Resource(10), xlist.ErrNotImplemented},
+		{"12.34.23.2", xlist.Resource(-1), xlist.ErrBadRequest},
+		{"12.34.23.3", xlist.Resource(10), xlist.ErrBadRequest},
 	}
 	for _, test := range tests {
 		_, _, got := xlist.DoValidation(context.Background(), test.name, test.resource, true)

@@ -9,23 +9,23 @@ import (
 	"github.com/luids-io/core/xlist"
 )
 
-type mockList struct {
+type mockCheck struct {
 	fail      bool
 	resources []xlist.Resource
 	response  xlist.Response
 	//lazy      time.Duration
 }
 
-func (l mockList) Check(ctx context.Context, name string, res xlist.Resource) (xlist.Response, error) {
+func (l mockCheck) Check(ctx context.Context, name string, res xlist.Resource) (xlist.Response, error) {
 	name, ctx, err := xlist.DoValidation(ctx, name, res, false)
 	if err != nil {
 		return xlist.Response{}, err
 	}
 	if !res.InArray(l.resources) {
-		return xlist.Response{}, xlist.ErrNotImplemented
+		return xlist.Response{}, xlist.ErrNotSupported
 	}
 	if l.fail {
-		return xlist.Response{}, xlist.ErrNotAvailable
+		return xlist.Response{}, xlist.ErrUnavailable
 	}
 	// if l.lazy > 0 {
 	// 	time.Sleep(l.lazy)
@@ -33,14 +33,14 @@ func (l mockList) Check(ctx context.Context, name string, res xlist.Resource) (x
 	return l.response, nil
 }
 
-func (l mockList) Ping() error {
+func (l mockCheck) Ping() error {
 	if l.fail {
-		return xlist.ErrNotAvailable
+		return xlist.ErrUnavailable
 	}
 	return nil
 }
 
-func (l mockList) Resources() []xlist.Resource {
+func (l mockCheck) Resources() []xlist.Resource {
 	ret := make([]xlist.Resource, len(l.resources), len(l.resources))
 	copy(ret, l.resources)
 	return ret
@@ -58,7 +58,7 @@ func (c mockContainer) Check(ctx context.Context, name string, res xlist.Resourc
 		return xlist.Response{}, err
 	}
 	if !res.InArray(c.resources) {
-		return xlist.Response{}, xlist.ErrNotImplemented
+		return xlist.Response{}, xlist.ErrNotSupported
 	}
 	for _, checker := range c.lists {
 		resp, err := checker.Check(ctx, name, res)

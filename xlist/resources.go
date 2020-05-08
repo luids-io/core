@@ -228,7 +228,7 @@ func DoValidation(ctx context.Context, name string, resource Resource, force boo
 		}
 	}
 	if !resource.IsValid() {
-		return name, ctx, ErrNotImplemented
+		return name, ctx, ErrBadRequest
 	}
 	canon, ok := Canonicalize(name, resource)
 	if !ok {
