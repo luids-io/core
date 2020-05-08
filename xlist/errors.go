@@ -6,8 +6,9 @@ import "errors"
 
 // Some standard errors returned by List interfaces
 var (
-	ErrBadRequest   = errors.New("bad request")
-	ErrNotSupported = errors.New("resource not supported")
-	ErrUnavailable  = errors.New("not available")
-	ErrInternal     = errors.New("internal error")
+	ErrCanceledRequest = errors.New("canceled request")
+	ErrBadRequest      = errors.New("bad request")
+	ErrNotSupported    = errors.New("resource not supported")
+	ErrUnavailable     = errors.New("not available")
+	ErrInternal        = errors.New("internal error")
 )

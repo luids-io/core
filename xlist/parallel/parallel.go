@@ -55,7 +55,7 @@ RESULTLOOP:
 			}
 			returned = append(returned, result)
 		case <-ctx.Done():
-			err = ctx.Err()
+			err = xlist.ErrCanceledRequest
 			break RESULTLOOP
 		}
 	}
