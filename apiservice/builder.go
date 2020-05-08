@@ -23,6 +23,8 @@ type ServiceDef struct {
 	Endpoint string `json:"endpoint"`
 	// Client configuration
 	Client *grpctls.ClientCfg `json:"client,omitempty"`
+	// Log
+	Log bool `json:"log,omitempty"`
 	// Metrics
 	Metrics bool `json:"metrics,omitempty"`
 	// Disabled
