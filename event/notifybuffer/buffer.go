@@ -73,7 +73,7 @@ func (b *Buffer) doProcess() {
 	for e := range b.eventCh {
 		reqid, err := b.notifier.NotifyEvent(context.Background(), e)
 		if err != nil {
-			b.logger.Warnf("%v", err)
+			b.logger.Warnf("sending event with code '%v': %v", e.Code, err)
 		}
 		b.logger.Debugf("notified event reqid: '%s'", reqid)
 	}
