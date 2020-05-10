@@ -6,7 +6,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/luids-io/core/utils/yalogi"
+	"github.com/luids-io/core/yalogi"
 )
 
 // Autoloader implements a lazy build of services

@@ -16,7 +16,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luids-io/core/utils/yalogi"
+	"github.com/luids-io/core/yalogi"
 )
 
 type options struct {

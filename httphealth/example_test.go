@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"net"
 
-	"github.com/luids-io/core/utils/httphealth"
+	"github.com/luids-io/core/httphealth"
 )
 
 // service is a supervised object

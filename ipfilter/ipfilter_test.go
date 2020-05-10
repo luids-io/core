@@ -5,7 +5,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/luids-io/core/utils/ipfilter"
+	"github.com/luids-io/core/ipfilter"
 )
 
 func TestEmpty(t *testing.T) {

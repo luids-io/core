@@ -17,8 +17,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/luids-io/core/utils/ipfilter"
-	"github.com/luids-io/core/utils/yalogi"
+	"github.com/luids-io/core/ipfilter"
+	"github.com/luids-io/core/yalogi"
 )
 
 // Pingable must be implemented by the service to be monitored
