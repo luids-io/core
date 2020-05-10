@@ -4,17 +4,8 @@ package dnsutil
 
 import (
 	"context"
-	"errors"
 	"net"
 	"time"
-)
-
-// Some standard errors returned by resolv interfaces
-var (
-	ErrBadRequestFormat      = errors.New("bad format in request")
-	ErrServiceNotAvailable   = errors.New("service not available")
-	ErrCollectDNSClientLimit = errors.New("max queries per dns client")
-	ErrCollectNamesLimit     = errors.New("max names resolved for an ip")
 )
 
 // ResolvCache interface defines a cache for dns resolutions
