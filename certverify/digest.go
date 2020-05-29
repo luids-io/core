@@ -1,28 +1,41 @@
+// Copyright 2020 Luis Guillén Civera <luisguillenc@gmail.com>. View LICENSE.
+
 package certverify
 
 import (
-	"crypto/md5"
 	"crypto/x509"
 	"encoding/hex"
+	"hash"
 )
 
-// DigestCert returns a digest of a certificate
-func DigestCert(cert *x509.Certificate) string {
-	hasher := md5.New()
-	return hex.EncodeToString(hasher.Sum(cert.Raw))
+// DigestCert returns a hash of the certificate encoded in string
+func DigestCert(hasher hash.Hash, cert *x509.Certificate) string {
+	hasher.Reset()
+	hasher.Write(cert.Raw)
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-// DigestChain returns digest of a certificate chain
-func DigestChain(certs []*x509.Certificate) string {
-	digest := ""
+// DigestCerts returns an slice with hashes of certificates and a hash of the concatenation
+func DigestCerts(hasher hash.Hash, certs []*x509.Certificate) ([]string, string) {
+	chain := ""
+	hashes := make([]string, 0, len(certs))
 	for _, cert := range certs {
-		digest += DigestCert(cert)
+		digest := DigestCert(hasher, cert)
+		hashes = append(hashes, digest)
+		chain += digest
 	}
-	return hashString(digest)
+	hasher.Reset()
+	hasher.Write([]byte(chain))
+	return hashes, hex.EncodeToString(hasher.Sum(nil))
 }
 
-func hashString(text string) string {
-	hasher := md5.New()
-	hasher.Write([]byte(text))
+// DigestChain returns a hash of the concatenation of digests
+func DigestChain(hasher hash.Hash, digests []string) string {
+	chain := ""
+	for _, digest := range digests {
+		chain += digest
+	}
+	hasher.Reset()
+	hasher.Write([]byte(chain))
 	return hex.EncodeToString(hasher.Sum(nil))
 }
