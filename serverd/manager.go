@@ -53,6 +53,7 @@ type Manager struct {
 	opts   options
 	logger yalogi.Logger
 
+	name      string
 	reloadErr error
 	mu        sync.Mutex
 	started   bool
@@ -60,7 +61,7 @@ type Manager struct {
 }
 
 // New creates a new manager
-func New(opt ...Option) *Manager {
+func New(name string, opt ...Option) *Manager {
 	opts := defaultOptions
 	for _, o := range opt {
 		o(&opts)
@@ -68,6 +69,7 @@ func New(opt ...Option) *Manager {
 	m := &Manager{
 		opts:     opts,
 		logger:   opts.logger,
+		name:     name,
 		services: make([]Service, 0),
 	}
 	return m
@@ -79,14 +81,14 @@ func (m *Manager) Register(svc Service) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if m.started {
-		return errors.New("manager is started")
+		return errors.New("serverd: manager is started")
 	}
 	if svc.Name == "" {
-		return errors.New("name can't be empty")
+		return errors.New("serverd: service name can't be empty")
 	}
 	for _, s := range m.services {
 		if s.Name == svc.Name {
-			return errors.New("name can't be duplicated")
+			return errors.New("serverd: service name can't be duplicated")
 		}
 	}
 	m.services = append(m.services, svc)
@@ -101,12 +103,12 @@ func (m *Manager) Start() error {
 	if m.started {
 		return nil
 	}
-	m.logger.Infof("starting services")
+	m.logger.Infof("starting %s services", m.name)
 	for _, s := range m.services {
 		m.logger.Infof("starting %s", s.Name)
 		err := s.start()
 		if err != nil {
-			return fmt.Errorf("starting %s: %v", s.Name, err)
+			return fmt.Errorf("serverd: starting %s: %v", s.Name, err)
 		}
 	}
 	m.started = true
@@ -124,7 +126,7 @@ func (m *Manager) Shutdown() {
 		return
 	}
 	m.started = false
-	m.logger.Infof("shutting down services")
+	m.logger.Infof("shutting down %s services", m.name)
 	for i := len(m.services) - 1; i >= 0; i-- {
 		s := m.services[i]
 		m.logger.Infof("shutting down %s", s.Name)
@@ -171,7 +173,7 @@ func (m *Manager) signalHndl(close chan bool) {
 // Ping will ping all registered services.
 func (m *Manager) Ping() error {
 	if !m.started {
-		return errors.New("manager not started")
+		return errors.New("serverd: manager not started")
 	}
 	err := m.ping()
 	if err != nil {
@@ -190,13 +192,13 @@ func (m *Manager) Reload() error {
 	if !m.started {
 		return nil
 	}
-	m.logger.Infof("reloading services")
+	m.logger.Infof("reloading %s services", m.name)
 	for _, s := range m.services {
 		m.logger.Debugf("reloading service %s", s.Name)
 		err := s.reload()
 		if err != nil {
 			m.logger.Warnf("reloading %s: %v", s.Name, err)
-			m.reloadErr = fmt.Errorf("reloading %s: %v", s.Name, err)
+			m.reloadErr = fmt.Errorf("serverd: reloading %s: %v", s.Name, err)
 			return m.reloadErr
 		}
 	}
