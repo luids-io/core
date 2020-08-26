@@ -9,17 +9,19 @@ import (
 	"strings"
 )
 
-// Policy stores fields and values
+// Policy stores fields and values (both are strings). Warning, it's unsafe.
 type Policy struct {
 	m map[string]string
 }
 
-// NewPolicy returns a new policy
+// NewPolicy returns a new policy.
 func NewPolicy() Policy {
 	return Policy{m: make(map[string]string, 0)}
 }
 
-// FromString loads from string the values of a policy
+// FromString loads from a encoded string the values of a policy.
+// String must be in the format:
+//  [policy]field1=value1,field2=value2[/policy]
 func (p *Policy) FromString(s string) error {
 	slow := strings.ToLower(s)
 	if !strings.HasPrefix(slow, "[policy]") || !strings.HasSuffix(slow, "[/policy]") {
@@ -49,18 +51,18 @@ func (p *Policy) FromString(s string) error {
 	return nil
 }
 
-// Empty returns true if the policy is empty
+// Empty returns true if the policy is empty.
 func (p Policy) Empty() bool {
 	return len(p.m) == 0
 }
 
-// Get returns the value of the field
+// Get returns the value of the field.
 func (p Policy) Get(field string) (string, bool) {
 	value, ok := p.m[field]
 	return value, ok
 }
 
-// Set a new field policy or modify existing value
+// Set a new field policy or modify existing value.
 func (p Policy) Set(field, value string) error {
 	if !fieldRegExp.MatchString(field) {
 		return errors.New("invalid field")
@@ -72,7 +74,7 @@ func (p Policy) Set(field, value string) error {
 	return nil
 }
 
-// Merge policies
+// Merge policies.
 func (p Policy) Merge(policies ...Policy) {
 	for _, policy := range policies {
 		for k, v := range policy.m {
@@ -81,7 +83,7 @@ func (p Policy) Merge(policies ...Policy) {
 	}
 }
 
-// Fields returns the fields in the policy
+// Fields returns the fields in the policy.
 func (p Policy) Fields() []string {
 	fields := make([]string, 0, len(p.m))
 	for k := range p.m {
@@ -90,7 +92,7 @@ func (p Policy) Fields() []string {
 	return fields
 }
 
-// String returns the policy string
+// String returns the policy encoded as string.
 func (p Policy) String() string {
 	if len(p.m) == 0 {
 		return ""
@@ -119,7 +121,7 @@ func WithPolicy(policy Policy, s string) string {
 }
 
 // ExtractPolicy extracts a policy from a reason string. It returns the policy,
-// an string reason without the policy and error
+// an string reason without the policy and error.
 func ExtractPolicy(s string) (Policy, string, error) {
 	policies, reason := extractPolicyStr(s)
 	p := NewPolicy()

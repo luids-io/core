@@ -1,8 +1,13 @@
+// Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. View LICENSE.md.
+
+// Package option helps to read values from option maps.
+//
+// This package is a work in progress and makes no API stability promises.
 package option
 
 import "fmt"
 
-// Bool returns the field passed as boolean in value, ok if exists
+// Bool returns the field passed as boolean in value, ok if exists.
 func Bool(opts map[string]interface{}, field string) (value bool, ok bool, err error) {
 	v, ok := opts[field]
 	if ok {
@@ -15,7 +20,7 @@ func Bool(opts map[string]interface{}, field string) (value bool, ok bool, err e
 	return
 }
 
-// String returns the field passed as string in value, ok if exists
+// String returns the field passed as string in value, ok if exists.
 func String(opts map[string]interface{}, field string) (value string, ok bool, err error) {
 	v, ok := opts[field]
 	if ok {
@@ -28,6 +33,7 @@ func String(opts map[string]interface{}, field string) (value string, ok bool, e
 	return
 }
 
+// Int returns the field passed as int in value, ok if exists.
 func Int(opts map[string]interface{}, field string) (value int, ok bool, err error) {
 	v, ok := opts[field]
 	if ok {
@@ -47,6 +53,7 @@ func Int(opts map[string]interface{}, field string) (value int, ok bool, err err
 	return
 }
 
+// Hash returns the field passed as a map of interfaces in value, ok if exists.
 func Hash(opts map[string]interface{}, field string) (value map[string]interface{}, ok bool, err error) {
 	v, ok := opts[field]
 	if ok {
@@ -60,6 +67,7 @@ func Hash(opts map[string]interface{}, field string) (value map[string]interface
 	return
 }
 
+// HashString returns the field passed as a map of strings in value, ok if exists.
 func HashString(opts map[string]interface{}, field string) (value map[string]string, ok bool, err error) {
 	v, ok := opts[field]
 	if ok {
@@ -86,6 +94,7 @@ func HashString(opts map[string]interface{}, field string) (value map[string]str
 	return
 }
 
+// SliceString returns the field passed as a slice of strings in value, ok if exists.
 func SliceString(opts map[string]interface{}, field string) (value []string, ok bool, err error) {
 	v, ok := opts[field]
 	if ok {
@@ -112,6 +121,7 @@ func SliceString(opts map[string]interface{}, field string) (value []string, ok 
 	return
 }
 
+// SliceHash returns the field passed as a slice of map of interfaces in value, ok if exists.
 func SliceHash(opts map[string]interface{}, field string) (value []map[string]interface{}, ok bool, err error) {
 	v, ok := opts[field]
 	if ok {
@@ -138,6 +148,7 @@ func SliceHash(opts map[string]interface{}, field string) (value []map[string]in
 	return
 }
 
+// SliceHashString returns the field passed as a slice of map of strings in value, ok if exists.
 func SliceHashString(opts map[string]interface{}, field string) (value []map[string]string, ok bool, err error) {
 	v, ok := opts[field]
 	if ok {

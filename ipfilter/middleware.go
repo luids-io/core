@@ -1,3 +1,5 @@
+// Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. View LICENSE.md.
+
 package ipfilter
 
 import (
@@ -31,7 +33,7 @@ func (f Filter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// UnaryServerInterceptor implements middleware for grpc servers
+// UnaryServerInterceptor implements middleware for grpc servers.
 func (f Filter) UnaryServerInterceptor(ctx context.Context, req interface{},
 	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	p, ok := peer.FromContext(ctx)

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Service defines data struct for services
+// Service defines data struct for services.
 type Service struct {
 	Name     string
 	Start    StartupFn
@@ -16,19 +16,19 @@ type Service struct {
 	Ping     PingFn
 }
 
-// StartupFn sets definition for startup functions
+// StartupFn sets definition for startup functions.
 type StartupFn func() error
 
-// ShutdownFn sets definition for gracely shutdown functions
+// ShutdownFn sets definition for gracely shutdown functions.
 type ShutdownFn func()
 
-// StopFn sets definition for stop functions (force)
+// StopFn sets definition for stop functions (force).
 type StopFn func()
 
-// ReloadFn sets definition for reload functions
+// ReloadFn sets definition for reload functions.
 type ReloadFn func() error
 
-// PingFn sets definition for ping functions
+// PingFn sets definition for ping functions.
 type PingFn func() error
 
 func (s Service) start() error {

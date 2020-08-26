@@ -19,6 +19,9 @@ import (
 	"github.com/luids-io/core/yalogi"
 )
 
+// Option is used for component configuration.
+type Option func(*options)
+
 type options struct {
 	logger          yalogi.Logger
 	shutdownTimeout time.Duration
@@ -29,10 +32,7 @@ var defaultOptions = options{
 	shutdownTimeout: 2 * time.Second,
 }
 
-// Option is used for component configuration
-type Option func(*options)
-
-// SetLogger option allows set a custom logger
+// SetLogger option allows set a custom logger.
 func SetLogger(l yalogi.Logger) Option {
 	return func(o *options) {
 		if l != nil {
@@ -41,14 +41,14 @@ func SetLogger(l yalogi.Logger) Option {
 	}
 }
 
-// ShutdownTimeout sets timeout for shutdowns
+// ShutdownTimeout option sets timeout for shutdowns.
 func ShutdownTimeout(d time.Duration) Option {
 	return func(o *options) {
 		o.shutdownTimeout = d
 	}
 }
 
-// Manager is the component that manages the services
+// Manager manages the services.
 type Manager struct {
 	opts   options
 	logger yalogi.Logger
@@ -60,7 +60,7 @@ type Manager struct {
 	services  []Service
 }
 
-// New creates a new manager
+// New creates a new manager.
 func New(name string, opt ...Option) *Manager {
 	opts := defaultOptions
 	for _, o := range opt {

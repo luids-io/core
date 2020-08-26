@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-// ClientCfg defines configuration for a client
+// ClientCfg defines configuration for a client.
 type ClientCfg struct {
 	// CertFile path to the client certificate
 	CertFile string `json:"certfile,omitempty"`
@@ -32,7 +32,7 @@ type ClientCfg struct {
 	UseSystemCAs bool `json:"systemca"`
 }
 
-// UseTLS returns true if TLS configuration is set
+// UseTLS returns true if TLS configuration is set.
 func (cfg ClientCfg) UseTLS() bool {
 	if cfg.ServerCert == "" && cfg.CACert == "" && !cfg.UseSystemCAs {
 		return false
@@ -40,7 +40,7 @@ func (cfg ClientCfg) UseTLS() bool {
 	return true
 }
 
-// Empty returns true if configuration values are empty
+// Empty returns true if configuration values are empty.
 func (cfg ClientCfg) Empty() bool {
 	if cfg.CertFile != "" {
 		return false
@@ -63,27 +63,27 @@ func (cfg ClientCfg) Empty() bool {
 	return true
 }
 
-// Validate if configuration is ok
+// Validate if configuration is ok.
 func (cfg ClientCfg) Validate() error {
 	if cfg.CertFile != "" {
 		if !fileExists(cfg.CertFile) {
-			return fmt.Errorf("certfile %v doesn't exists", cfg.CertFile)
+			return fmt.Errorf("certfile '%v' doesn't exists", cfg.CertFile)
 		}
 		if cfg.KeyFile == "" {
 			return errors.New("keyfile is required for client's certificate")
 		}
 		if !fileExists(cfg.KeyFile) {
-			return fmt.Errorf("keyfile %v doesn't exists", cfg.KeyFile)
+			return fmt.Errorf("keyfile '%v' doesn't exists", cfg.KeyFile)
 		}
 	}
 	if cfg.ServerCert != "" {
 		if !fileExists(cfg.ServerCert) {
-			return fmt.Errorf("servercert file %v doesn't exists", cfg.ServerCert)
+			return fmt.Errorf("servercert file '%v' doesn't exists", cfg.ServerCert)
 		}
 	}
 	if cfg.CACert != "" {
 		if !fileExists(cfg.CACert) {
-			return fmt.Errorf("cacert file %v doesn't exists", cfg.CACert)
+			return fmt.Errorf("cacert file '%v' doesn't exists", cfg.CACert)
 		}
 	}
 	//some logic
@@ -113,7 +113,7 @@ func (cfg ClientCfg) getCreds(addr string) (credentials.TransportCredentials, er
 	if cfg.CACert != "" {
 		ca, err := ioutil.ReadFile(cfg.CACert)
 		if err != nil {
-			return nil, fmt.Errorf("could not read ca certificate %s: %v", cfg.CACert, err)
+			return nil, fmt.Errorf("could not read ca certificate '%s': %v", cfg.CACert, err)
 		}
 		if ok := certPool.AppendCertsFromPEM(ca); !ok {
 			return nil, errors.New("failed to append client certs")
@@ -125,14 +125,14 @@ func (cfg ClientCfg) getCreds(addr string) (credentials.TransportCredentials, er
 	} else {
 		servername, _, err := net.SplitHostPort(addr)
 		if err != nil {
-			return nil, fmt.Errorf("could not get servername from %s: %v", addr, err)
+			return nil, fmt.Errorf("could not get servername from '%s': %v", addr, err)
 		}
 		tlsConfig.ServerName = servername
 	}
 	if cfg.CertFile != "" {
 		certificate, err := tls.LoadX509KeyPair(cfg.CertFile, cfg.KeyFile)
 		if err != nil {
-			return nil, fmt.Errorf("could not load cert %s and key %s pair: %v", cfg.CertFile, cfg.KeyFile, err)
+			return nil, fmt.Errorf("could not load client key pair: %v", err)
 		}
 		tlsConfig.Certificates = []tls.Certificate{certificate}
 	}
@@ -148,7 +148,7 @@ func Dial(uri string, cfg ClientCfg, grpcOpts ...grpc.DialOption) (*grpc.ClientC
 func DialContext(ctx context.Context, uri string, cfg ClientCfg, grpcOpts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	proto, addr, err := ParseURI(uri)
 	if err != nil {
-		return nil, fmt.Errorf("cannot parse URI %v: %v", uri, err)
+		return nil, fmt.Errorf("grpctls: cannot parse URI '%v': %v", uri, err)
 	}
 	if proto == "unix" {
 		dopts := make([]grpc.DialOption, 0)
@@ -169,11 +169,11 @@ func DialContext(ctx context.Context, uri string, cfg ClientCfg, grpcOpts ...grp
 	//useTLS
 	err = cfg.Validate()
 	if err != nil {
-		return nil, fmt.Errorf("validating client tls config: %v", err)
+		return nil, fmt.Errorf("grpctls: validating client tls config: %v", err)
 	}
 	creds, err := cfg.getCreds(addr)
 	if err != nil {
-		return nil, fmt.Errorf("getting client tls credentials: %v", err)
+		return nil, fmt.Errorf("grpctls: getting client tls credentials: %v", err)
 	}
 	dopts := make([]grpc.DialOption, 0)
 	dopts = append(dopts, grpc.WithTransportCredentials(creds))

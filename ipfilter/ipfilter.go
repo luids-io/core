@@ -11,20 +11,20 @@ import (
 	"net/http"
 )
 
-// Action to be taken with the request
+// Action to be taken with the request.
 type Action bool
 
-// Posible values for Action
+// Values for Action.
 const (
 	Deny   Action = false
 	Accept Action = true
 )
 
-// Filter is the main structure
+// Filter is the main structure.
 type Filter struct {
-	// Wrapped http handler to control
+	// Wrapped http handler to control requests
 	Wrapped http.Handler
-
+	// Autocommented...
 	AllowedIPs      []net.IP
 	DisallowedIPs   []net.IP
 	AllowedCIDRs    []*net.IPNet
@@ -33,7 +33,7 @@ type Filter struct {
 	Policy Action
 }
 
-// Empty resturns true if no list has information
+// Empty resturns true if no list has information.
 func (f Filter) Empty() bool {
 	if f.AllowedIPs != nil && len(f.AllowedIPs) > 0 {
 		return false
@@ -50,7 +50,7 @@ func (f Filter) Empty() bool {
 	return true
 }
 
-// Check returns the action to be taken for the ip
+// Check returns the action to be taken for the ip.
 func (f Filter) Check(ip net.IP) Action {
 	if f.AllowedCIDRs != nil && len(f.AllowedCIDRs) > 0 {
 		for _, net := range f.AllowedCIDRs {

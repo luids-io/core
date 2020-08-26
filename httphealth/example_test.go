@@ -20,11 +20,12 @@ func (s service) Ping() error {
 	return nil
 }
 
+// Creates a health server that checks a service and exposes metrics
 func Example() {
 	lis, err := net.Listen("tcp", "127.0.0.1:8081")
 	if err != nil {
 		log.Fatalf("listening: %v", err)
 	}
-	health := httphealth.New(&service{})
+	health := httphealth.New(&service{}, httphealth.Metrics(true))
 	health.Serve(lis)
 }

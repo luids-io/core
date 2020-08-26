@@ -1,6 +1,6 @@
 // Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. See LICENSE.
 
-// Package reason provides some utils for encoding data into response.Reason.
+// Package reason provides some utils for encoding data into a 'reason' string.
 //
 // This package is a work in progress and makes no API stability promises.
 package reason

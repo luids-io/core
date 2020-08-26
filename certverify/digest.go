@@ -8,14 +8,14 @@ import (
 	"hash"
 )
 
-// DigestCert returns a hash of the certificate encoded in string
+// DigestCert returns a hash of the certificate encoded in string.
 func DigestCert(hasher hash.Hash, cert *x509.Certificate) string {
 	hasher.Reset()
 	hasher.Write(cert.Raw)
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-// DigestCerts returns an slice with hashes of certificates and a hash of the concatenation
+// DigestCerts returns a slice with certificate hashes and a hash of the full chain.
 func DigestCerts(hasher hash.Hash, certs []*x509.Certificate) ([]string, string) {
 	chain := ""
 	hashes := make([]string, 0, len(certs))
@@ -29,7 +29,7 @@ func DigestCerts(hasher hash.Hash, certs []*x509.Certificate) ([]string, string)
 	return hashes, hex.EncodeToString(hasher.Sum(nil))
 }
 
-// DigestChain returns a hash of the concatenation of digests
+// DigestChain returns a hash of the concatenation of hashes.
 func DigestChain(hasher hash.Hash, digests []string) string {
 	chain := ""
 	for _, digest := range digests {

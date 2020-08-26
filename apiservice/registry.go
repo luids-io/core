@@ -9,14 +9,14 @@ import (
 	"sync"
 )
 
-// Registry stores service items
+// Registry stores service items indexed by an id. Implements Discover interface.
 type Registry struct {
 	list     []string
 	services map[string]Service
 	mu       sync.RWMutex
 }
 
-// NewRegistry instantiates a new registry
+// NewRegistry instantiates a new registry.
 func NewRegistry() *Registry {
 	return &Registry{
 		services: make(map[string]Service),
@@ -24,7 +24,7 @@ func NewRegistry() *Registry {
 	}
 }
 
-// Register a service using an id and a Service interface
+// Register a service using an id.
 func (r *Registry) Register(id string, svc Service) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -37,7 +37,7 @@ func (r *Registry) Register(id string, svc Service) error {
 	return nil
 }
 
-// GetService implements Discover interface
+// GetService implements Discover interface.
 func (r *Registry) GetService(id string) (Service, bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -48,7 +48,7 @@ func (r *Registry) GetService(id string) (Service, bool) {
 	return svc, true
 }
 
-// ListServices implements Discover interface
+// ListServices implements Discover interface.
 func (r *Registry) ListServices() []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -57,7 +57,7 @@ func (r *Registry) ListServices() []string {
 	return list
 }
 
-// Ping all registered services
+// Ping all registered services.
 func (r *Registry) Ping() error {
 	errs := make([]string, 0, len(r.services))
 	for _, id := range r.ListServices() {
@@ -75,7 +75,7 @@ func (r *Registry) Ping() error {
 	return nil
 }
 
-// CloseAll registered services
+// CloseAll registered services.
 func (r *Registry) CloseAll() error {
 	errs := make([]string, 0, len(r.services))
 	for _, id := range r.ListServices() {

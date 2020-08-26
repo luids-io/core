@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// ParseURI parses uri strings used in structs, it returns protocol and address
+// ParseURI parses uri strings used in structs, it returns protocol and address.
 func ParseURI(s string) (proto string, addr string, err error) {
 	err = nil
 	if strings.HasPrefix(s, "unix://") {

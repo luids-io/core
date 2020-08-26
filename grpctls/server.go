@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-// ServerCfg defines configuration for a server
+// ServerCfg defines configuration for a server.
 type ServerCfg struct {
 	// CertFile path to the server certificate
 	CertFile string
@@ -25,7 +25,7 @@ type ServerCfg struct {
 	ClientAuth bool
 }
 
-// UseTLS returns true if TLS configuration is set
+// UseTLS returns true if TLS configuration is set.
 func (cfg ServerCfg) UseTLS() bool {
 	if cfg.CertFile == "" {
 		return false
@@ -33,23 +33,23 @@ func (cfg ServerCfg) UseTLS() bool {
 	return true
 }
 
-// Validate if configuration is ok
+// Validate if configuration is ok.
 func (cfg ServerCfg) Validate() error {
 	if cfg.CertFile == "" {
 		return errors.New("certfile is required")
 	}
 	if !fileExists(cfg.CertFile) {
-		return fmt.Errorf("certfile %v doesn't exists", cfg.CertFile)
+		return fmt.Errorf("certfile '%v' doesn't exists", cfg.CertFile)
 	}
 	if cfg.KeyFile == "" {
 		return errors.New("keyfile is required for server's certificate")
 	}
 	if !fileExists(cfg.KeyFile) {
-		return fmt.Errorf("keyfile %v doesn't exists", cfg.KeyFile)
+		return fmt.Errorf("keyfile '%v' doesn't exists", cfg.KeyFile)
 	}
 	if cfg.CACert != "" {
 		if !fileExists(cfg.CACert) {
-			return fmt.Errorf("cacert file %v doesn't exists", cfg.CACert)
+			return fmt.Errorf("cacert file '%v' doesn't exists", cfg.CACert)
 		}
 	}
 	if cfg.ClientAuth {
@@ -65,22 +65,22 @@ func (cfg ServerCfg) Validate() error {
 	return nil
 }
 
-// Creds creates a transport credentials for the configuration
+// Creds creates a transport credentials for the configuration.
 func Creds(cfg ServerCfg) (credentials.TransportCredentials, error) {
 	// some checks
 	if !cfg.UseTLS() {
-		return nil, errors.New("server config doesn't use TLS")
+		return nil, errors.New("grpctls: server config doesn't use TLS")
 	}
 	err := cfg.Validate()
 	if err != nil {
-		return nil, fmt.Errorf("server TLS config provided is not valid: %v", err)
+		return nil, fmt.Errorf("grpctls: server TLS config provided is not valid: %v", err)
 	}
 
 	// without authentication
 	if !cfg.ClientAuth {
 		creds, err := credentials.NewServerTLSFromFile(cfg.CertFile, cfg.KeyFile)
 		if err != nil {
-			return nil, fmt.Errorf("could not load TLS keys: %s", err)
+			return nil, fmt.Errorf("grpctls: could not load TLS keys: %s", err)
 		}
 		return creds, nil
 	}
@@ -88,15 +88,15 @@ func Creds(cfg ServerCfg) (credentials.TransportCredentials, error) {
 	// with authentication
 	certificate, err := tls.LoadX509KeyPair(cfg.CertFile, cfg.KeyFile)
 	if err != nil {
-		return nil, fmt.Errorf("could not load server key pair: %s", err)
+		return nil, fmt.Errorf("grpctls: could not load server key pair: %s", err)
 	}
 	certPool := x509.NewCertPool()
 	ca, err := ioutil.ReadFile(cfg.CACert)
 	if err != nil {
-		return nil, fmt.Errorf("could not read CA cert %s: %v", cfg.CACert, err)
+		return nil, fmt.Errorf("grpctls: could not read CA cert '%s': %v", cfg.CACert, err)
 	}
 	if ok := certPool.AppendCertsFromPEM(ca); !ok {
-		return nil, fmt.Errorf("configuring client's CA cert %s", cfg.CACert)
+		return nil, fmt.Errorf("grpctls: configuring client's CA cert '%s'", cfg.CACert)
 	}
 	creds := credentials.NewTLS(&tls.Config{
 		ClientAuth:   tls.RequireAndVerifyClientCert,
@@ -106,15 +106,15 @@ func Creds(cfg ServerCfg) (credentials.TransportCredentials, error) {
 	return creds, nil
 }
 
-// Listener returns a valid listener server from an URI
+// Listener returns a valid listener server from an URI.
 func Listener(uri string) (net.Listener, error) {
 	proto, addr, err := ParseURI(uri)
 	if err != nil {
-		return nil, fmt.Errorf("cannot parse address %v: %v", uri, err)
+		return nil, fmt.Errorf("grpctls: cannot parse address '%v': %v", uri, err)
 	}
 	lis, err := net.Listen(proto, addr)
 	if err != nil {
-		return nil, fmt.Errorf("cannot listen socket %v: %v", uri, err)
+		return nil, fmt.Errorf("grpctls: cannot listen socket '%v': %v", uri, err)
 	}
 	return lis, nil
 }

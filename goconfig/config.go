@@ -1,3 +1,8 @@
+// Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. View LICENSE.
+
+// Package goconfig provides a simple method for configuring applications.
+//
+// This package is a work in progress and makes no API stability promises.
 package goconfig
 
 import (
@@ -8,7 +13,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Config is the main configuration struct
+// Config is the main configuration struct.
+// It uses Viper as configuration backend.
 type Config struct {
 	v          *viper.Viper
 	program    string
@@ -17,15 +23,19 @@ type Config struct {
 	validators []Validator
 }
 
-// Section represents configuration sections
+// Section stores Configurable objects.
 type Section struct {
-	Name     string
+	// Name of base section
+	Name string
+	// Required if can't be empty
 	Required bool
-	Short    bool
-	Data     Configurable
+	// Short if uses short flags
+	Short bool
+	// Data stores Configurable interface
+	Data Configurable
 }
 
-// Configurable is the interface for configuration data
+// Configurable is the interface for configuration data.
 type Configurable interface {
 	//SetPFlags sets posix flags with the prefix and short options
 	SetPFlags(short bool, prefix string)
@@ -41,10 +51,10 @@ type Configurable interface {
 	Dump() string
 }
 
-// Validator defines additional validators
+// Validator allows to define additional validators.
 type Validator func(cfg *Config) error
 
-// New creates a configuration with sections passed
+// New creates a new configuration with sections.
 func New(program string, sections ...Section) (*Config, error) {
 	c := &Config{
 		v:        viper.New(),
@@ -55,7 +65,7 @@ func New(program string, sections ...Section) (*Config, error) {
 	for _, s := range sections {
 		_, ok := c.snames[s.Name]
 		if ok {
-			return nil, errors.New("duplicated section name")
+			return nil, errors.New("goconfig: duplicated section name")
 		}
 		c.sections = append(c.sections, s)
 		c.snames[s.Name] = true
@@ -63,7 +73,7 @@ func New(program string, sections ...Section) (*Config, error) {
 	return c, nil
 }
 
-// PFlags register posix flags of the structs
+// PFlags register posix flags of the structs.
 func (c *Config) PFlags() {
 	for _, s := range c.sections {
 		s.Data.SetPFlags(s.Short, s.Name)
@@ -71,7 +81,29 @@ func (c *Config) PFlags() {
 	}
 }
 
-// LoadIfFile try to load from path if not empty
+// Load configuration from default files.
+func (c *Config) Load() error {
+	c.loadFromEnv()
+	err := c.loadFromDefaultFiles()
+	if err != nil {
+		return err
+	}
+	c.loadValues()
+	return c.validate()
+}
+
+// LoadFromFile configuration data.
+func (c *Config) LoadFromFile(path string) error {
+	c.loadFromEnv()
+	err := c.loadFromFile(path)
+	if err != nil {
+		return err
+	}
+	c.loadValues()
+	return c.validate()
+}
+
+// LoadIfFile try to load from path if not empty.
 func (c *Config) LoadIfFile(path string) error {
 	c.loadFromEnv()
 	var err error
@@ -87,29 +119,7 @@ func (c *Config) LoadIfFile(path string) error {
 	return c.validate()
 }
 
-// LoadFromFile configuration from defined file
-func (c *Config) LoadFromFile(path string) error {
-	c.loadFromEnv()
-	err := c.loadFromFile(path)
-	if err != nil {
-		return err
-	}
-	c.loadValues()
-	return c.validate()
-}
-
-// Load configuration from defined file
-func (c *Config) Load() error {
-	c.loadFromEnv()
-	err := c.loadFromDefaultFiles()
-	if err != nil {
-		return err
-	}
-	c.loadValues()
-	return c.validate()
-}
-
-// Data returns data from a section
+// Data returns a Configurable data section.
 func (c *Config) Data(section string) Configurable {
 	for _, s := range c.sections {
 		if s.Name == section {
@@ -119,7 +129,7 @@ func (c *Config) Data(section string) Configurable {
 	return nil
 }
 
-// Dump returns data from a section
+// Dump stored data.
 func (c *Config) Dump() string {
 	output := ""
 	for _, s := range c.sections {
@@ -131,7 +141,7 @@ func (c *Config) Dump() string {
 	return output
 }
 
-// AddValidator add validator to object
+// AddValidator add custom validator to Config.
 func (c *Config) AddValidator(v Validator) {
 	c.validators = append(c.validators, v)
 }
@@ -156,7 +166,7 @@ func (c *Config) loadFromDefaultFiles() error {
 
 func (c *Config) loadFromFile(path string) error {
 	if !fileExists(path) {
-		return fmt.Errorf("config file %s not found", path)
+		return fmt.Errorf("goconfig: file '%s' not found", path)
 	}
 	c.v.SetConfigFile(path)
 	return c.v.ReadInConfig()
@@ -173,23 +183,23 @@ func (c *Config) validate() error {
 		empty := s.Data.Empty()
 		if empty && s.Required {
 			if s.Name == "" {
-				return errors.New("default section: is required")
+				return errors.New("goconfig: default section is required")
 			}
-			return fmt.Errorf("section '%s': is required", s.Name)
+			return fmt.Errorf("goconfig: section '%s' is required", s.Name)
 		}
 		if !empty {
 			err := s.Data.Validate()
 			if err != nil {
 				if s.Name == "" {
-					return fmt.Errorf("default section: %v", err)
+					return fmt.Errorf("goconfig: validating default section: %v", err)
 				}
-				return fmt.Errorf("section '%s': %v", s.Name, err)
+				return fmt.Errorf("goconfig: validating section '%s': %v", s.Name, err)
 			}
 		}
 	}
 	for _, v := range c.validators {
 		if err := v(c); err != nil {
-			return err
+			return fmt.Errorf("goconfig: running validator: %v", err)
 		}
 	}
 	return nil

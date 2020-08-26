@@ -9,7 +9,7 @@ import (
 	"net"
 )
 
-// FetchCerts from a tls server doing a nil connection, returning certificates and oscp response
+// FetchCerts from a tls server doing a nil connection, returning certificates and oscp response.
 func FetchCerts(ip net.IP, port int, sni string, config *tls.Config) ([]*x509.Certificate, []byte, error) {
 	config = config.Clone()
 	// prepare config to fetch certs

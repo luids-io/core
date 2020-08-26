@@ -1,5 +1,9 @@
 // Copyright 2020 Luis Guillén Civera <luisguillenc@gmail.com>. View LICENSE.
 
+// Package certverify provides some helper functions to verify, compute the
+// signature or download certificates.
+//
+// This package is a work in progress and makes no API stability promises.
 package certverify
 
 import (
@@ -9,7 +13,7 @@ import (
 	"time"
 )
 
-// VerifyChain verifies a chain of certificates passed in a slice
+// VerifyChain verifies a chain of certificates passed in a slice.
 func VerifyChain(certs []*x509.Certificate, currentTime time.Time, dnsName string) error {
 	// prepare itermediates
 	intermediates := x509.NewCertPool()
@@ -31,7 +35,7 @@ func VerifyChain(certs []*x509.Certificate, currentTime time.Time, dnsName strin
 	return nil
 }
 
-// SetCABundlePath sets file path where CA certs are stored
+// SetCABundlePath sets file path where CA certs are stored.
 func SetCABundlePath(caBundlePath string) error {
 	rca, err := caBundle(caBundlePath)
 	if err != nil {

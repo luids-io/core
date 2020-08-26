@@ -9,7 +9,7 @@ import (
 	"github.com/luids-io/core/yalogi"
 )
 
-// Autoloader implements a lazy build of services
+// Autoloader implements Discover using a lazy build.
 type Autoloader struct {
 	logger yalogi.Logger
 	defs   map[string]ServiceDef
@@ -17,29 +17,27 @@ type Autoloader struct {
 	mu     sync.RWMutex
 }
 
-// Option is used for component configuration
-type Option func(*options)
+// AutoloaderOption is used for Autoloader configuration.
+type AutoloaderOption func(*autoOptions)
 
-type options struct {
+type autoOptions struct {
 	logger yalogi.Logger
 }
 
-var defaultOptions = options{
-	logger: yalogi.LogNull,
-}
+var defaultAutoOptions = autoOptions{logger: yalogi.LogNull}
 
-// SetLogger option allows set a custom logger
-func SetLogger(l yalogi.Logger) Option {
-	return func(o *options) {
+// SetLogger option allows set a custom logger.
+func SetLogger(l yalogi.Logger) AutoloaderOption {
+	return func(o *autoOptions) {
 		if l != nil {
 			o.logger = l
 		}
 	}
 }
 
-// NewAutoloader creates a new Autoloader with definitions
-func NewAutoloader(defs []ServiceDef, opt ...Option) *Autoloader {
-	opts := defaultOptions
+// NewAutoloader creates a new Autoloader with service definitions.
+func NewAutoloader(defs []ServiceDef, opt ...AutoloaderOption) *Autoloader {
+	opts := defaultAutoOptions
 	for _, o := range opt {
 		o(&opts)
 	}
@@ -56,7 +54,7 @@ func NewAutoloader(defs []ServiceDef, opt ...Option) *Autoloader {
 	return a
 }
 
-// GetService implements Discover interface
+// GetService implements Discover interface.
 func (a *Autoloader) GetService(id string) (Service, bool) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -73,14 +71,14 @@ func (a *Autoloader) GetService(id string) (Service, bool) {
 	//build service & register
 	svc, err := Build(def, a.logger)
 	if err != nil {
-		a.logger.Errorf("building service %s: %v", id, err)
+		a.logger.Errorf("apiservice: autoloader building service '%s': %v", id, err)
 		return nil, false
 	}
 	a.reg.Register(id, svc)
 	return svc, ok
 }
 
-// ListServices implements Discover interface
+// ListServices implements Discover interface.
 func (a *Autoloader) ListServices() []string {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
@@ -92,12 +90,12 @@ func (a *Autoloader) ListServices() []string {
 	return list
 }
 
-// Ping all registered services
+// Ping all registered services.
 func (a *Autoloader) Ping() error {
 	return a.reg.Ping()
 }
 
-// CloseAll registered services
+// CloseAll registered services.
 func (a *Autoloader) CloseAll() error {
 	return a.reg.CloseAll()
 }

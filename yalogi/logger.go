@@ -1,7 +1,7 @@
+// Copyright 2019 Luis Guillén Civera <luisguillenc@gmail.com>. View LICENSE.
+
 // Package yalogi means "Yet Another Logger Interface" and provides a simple
-// logger interface for use it in my projects.
-//
-// Feel free to use it in yours ;)
+// logger interface.
 //
 // This package is a work in progress and makes no API stability promises.
 package yalogi
@@ -13,10 +13,10 @@ import (
 	"os"
 )
 
-// Level type can be used to classify the level of log messages
+// Level type can be used to classify the level of log messages.
 type Level int
 
-// Constants for levels
+// Constants for levels.
 const (
 	Debug Level = iota
 	Info
@@ -25,7 +25,7 @@ const (
 	Fatal
 )
 
-// Logger is the main interface of the package
+// Logger is the main interface of the package.
 type Logger interface {
 	Debugf(template string, args ...interface{})
 	Infof(template string, args ...interface{})
@@ -34,7 +34,7 @@ type Logger interface {
 	Fatalf(template string, args ...interface{})
 }
 
-// LogNull is an instance of a logger object that does nothing
+// LogNull is an instance of a logger object that does nothing.
 var LogNull = &nullLogger{}
 
 // nullLogger satisfies the interface with an implementation that does nothing.
