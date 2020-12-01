@@ -28,6 +28,8 @@ type ServiceDef struct {
 	Log bool `json:"log,omitempty"`
 	// Enable metrics
 	Metrics bool `json:"metrics,omitempty"`
+	// Enable cache
+	Cache bool `json:"cache,omitempty"`
 	// Opts stores custom fields
 	Opts map[string]interface{} `json:"opts,omitempty"`
 }
